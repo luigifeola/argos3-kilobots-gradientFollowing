@@ -1,35 +1,41 @@
 /**
- * @file <demoC_ALF.h>
+ * @file <gradientFollowing_ALF.h>
  *
- * @author Mohamed Salaheddine Talamali <mstalamali1@sheffield.ac.uk>
+ * @author Luigi Feola <feola@diag.uniroma1.it>
  *
- * @brief This is the header file of the ARK Loop Function (ALF), the simulated counterpart of the ARK (Augmented Reality for Kilobots) system. Here, we reproduce
- * the demo C of the real ARK: https://www.youtube.com/watch?v=K0KvPzhOSDo .
+ * @brief This is the source file of the ARK Loop Function (ALF), the simulated counterpart of the ARK (Augmented Reality for Kilobots) system.
  *
  * @cite Reina, A., Cope, A. J., Nikolaidis, E., Marshall, J. A. R., & Sabo, C. (2017). ARK: Augmented Reality for Kilobots.
  * IEEE Robotics and Automation Letters, 2(3), 1755–1761. https://doi.org/10.1109/LRA.2017.2700059
  *
  */
 
+#ifndef GRADIENTFOLLOWING_ALF_H
+#define GRADIENTFOLLOWING_ALF_H
 
-
-#ifndef DEMOC_ALF_H
-#define DEMOC_ALF_H
-
-namespace argos {
-class CSpace;
-class CFloorEntity;
-class CSimulator;
+namespace argos
+{
+    class CSpace;
+    class CFloorEntity;
+    class CSimulator;
 }
 
-#include <math.h>
+typedef enum
+{
+    kBLACK = 0,
+    kGRAY = 1,
+    kWHITE = 2
+} light_sensor;
 
+
+#include <math.h>
+#include <bitset>
+#include <numeric>
 
 #include <argos3/core/simulator/loop_functions.h>
 #include <argos3/plugins/robots/kilobot/simulator/ALF.h>
 #include <argos3/core/simulator/simulator.h>
 #include <argos3/core/simulator/physics_engine/physics_engine.h>
-
 
 #include <argos3/core/utility/math/vector3.h>
 #include <argos3/core/utility/math/vector2.h>
@@ -47,27 +53,24 @@ class CSimulator;
 #include <argos3/plugins/robots/kilobot/simulator/kilobot_communication_medium.h>
 #include <argos3/plugins/robots/kilobot/simulator/kilobot_communication_default_actuator.h>
 
-//kilobot messaging
+// kilobot messaging
 #include <argos3/plugins/robots/kilobot/control_interface/kilolib.h>
 #include <argos3/plugins/robots/kilobot/control_interface/message_crc.h>
 #include <argos3/plugins/robots/kilobot/control_interface/message.h>
 
 #include <array>
 
-
 using namespace argos;
 
-
-class CDemoCALF : public CALF
+class GradientFollowingCALF : public CALF
 {
 
 public:
+    GradientFollowingCALF();
 
-    CDemoCALF();
+    virtual ~GradientFollowingCALF() {}
 
-    virtual ~CDemoCALF(){}
-
-    virtual void Init(TConfigurationNode& t_tree);
+    virtual void Init(TConfigurationNode &t_tree);
 
     virtual void Reset();
 
@@ -82,59 +85,62 @@ public:
     void SetupInitialKilobotStates();
 
     /** Setup the initial state of the kilobot pc_kilobot_entity */
-    void SetupInitialKilobotState(CKilobotEntity& c_kilobot_entity);
+    void SetupInitialKilobotState(CKilobotEntity &c_kilobot_entity);
 
     /** Setup virtual environment */
-    void SetupVirtualEnvironments(TConfigurationNode& t_tree);
+    void SetupVirtualEnvironments(TConfigurationNode &t_tree);
 
     /** Get experiment variables */
-    void GetExperimentVariables(TConfigurationNode& t_tree);
+    void GetExperimentVariables(TConfigurationNode &t_tree);
 
     /** Get the message to send to a Kilobot according to its position */
-    void UpdateKilobotState(CKilobotEntity& c_kilobot_entity);
+    void UpdateKilobotState(CKilobotEntity &c_kilobot_entity);
 
     /** Get the message to send to a Kilobot according to its position */
-    void UpdateVirtualSensor(CKilobotEntity& c_kilobot_entity);
+    void UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity);
 
     /** Used to plot the Virtual environment on the floor */
-    virtual CColor GetFloorColor(const CVector2& vec_position_on_plane);
+    virtual CColor GetFloorColor(const CVector2 &vec_position_on_plane);
+
+    /** 2D vector rotation */
+    CVector2 VectorRotation2D(Real angle, CVector2 vec);
+
+    /** Simulate proximity sensor*/
+    std::vector<int> Proximity_sensor(CVector2 obstacle_direction, Real kOrientation, int num_sectors);
+
+    /** Log Kilobot pose and state */
+    void KiloLOG();
 
 private:
-
     /************************************/
     /*  Virtual Environment variables   */
     /************************************/
 
-    /** virtual environment types*/
-    enum EAreaType {
-        HOME = 0,
-        FOOD = 1
-    };
-
     /** virtual environment struct*/
-    struct SVirtualArea
+    struct Gradient
     {
-        EAreaType EnvType;
-        CVector2 GoalLocation;
-        Real GoalSize;
-        SInt16 UpperBoundVS=13;
-        CColor Color;
-        Real MinTimeBetweenTwoMsg;
-        std::vector < Real >  LastSent;
-        std::vector < bool >  SignalSwap;
+        CVector2 CenterPos;
     };
-
-    /** Virtual environments (one food area and one home area in this example) */
-    SVirtualArea m_sFoodEnv={FOOD};
-    SVirtualArea m_sHomeEnv={HOME};
 
     /***********************************/
     /*      Experiment variables       */
     /***********************************/
+    /* random number generator */
+    CRandom::CRNG *c_rng;
+    UInt32 random_seed;
+    std::vector<Real> m_vecLastTimeMessaged;
+    Real m_fMinTimeBetweenTwoMsg;
 
-    /** Virtual robots' states*/
-    std::vector < bool >  m_vecHasFood;
-    std::vector <SVirtualArea*> m_vecKilobotsEnvironment;
+    /* output LOG files */
+    std::ofstream m_kiloOutput;
+    std::string m_strKiloOutputFileName;
+
+
+
+    /* Kilobots properties */
+    std::vector<CVector2> m_vecKilobotsPositions;
+    std::vector<CColor> m_vecKilobotsLightSensors;
+    std::vector<CRadians> m_vecKilobotsOrientations;
 
     /** Gradient field radius */
     Real m_fGradientFieldRadius;

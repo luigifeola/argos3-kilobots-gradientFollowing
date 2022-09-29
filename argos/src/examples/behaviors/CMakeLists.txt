@@ -82,6 +82,13 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
   add_executable(forager forager.c)  
   target_link_libraries(forager argos3plugin_simulator_kilolib)
 
+
+  #
+  # ARK loop function: gradientFollowing
+  #
+  add_executable(gradient_follower gradient_follower.c)  
+  target_link_libraries(gradient_follower argos3plugin_simulator_kilolib)
+
   #
   # ARK loop function: clustering
   #
