@@ -54,8 +54,8 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
     simulator/kilobot_communication_entity.cpp
     simulator/kilobot_communication_medium.cpp)
   # Compile the graphical visualization only if the necessary libraries have been found
-  include(ARGoSCheckQTOpenGL)
-  if(ARGOS_COMPILE_QTOPENGL)
+  #include(ARGoSCheckQTOpenGL)
+  #if(ARGOS_COMPILE_QTOPENGL)
     set(ARGOS3_HEADERS_PLUGINS_ROBOTS_KILOBOT_SIMULATOR
       ${ARGOS3_HEADERS_PLUGINS_ROBOTS_KILOBOT_SIMULATOR}
       simulator/qtopengl_kilobot.h)
@@ -63,7 +63,7 @@ if(ARGOS_BUILD_FOR_SIMULATOR)
       ${ARGOS3_SOURCES_PLUGINS_ROBOTS_KILOBOT}
       simulator/qtopengl_kilobot.h
       simulator/qtopengl_kilobot.cpp)
-  endif(ARGOS_COMPILE_QTOPENGL)
+  #endif(ARGOS_COMPILE_QTOPENGL)
 endif(ARGOS_BUILD_FOR_SIMULATOR)
 
 #
@@ -82,9 +82,9 @@ else(RT_FOUND)
     argos3plugin_${ARGOS_BUILD_FOR}_pointmass3d)
 endif(RT_FOUND)
 
-if(ARGOS_COMPILE_QTOPENGL)
+#if(ARGOS_COMPILE_QTOPENGL)
   target_link_libraries(argos3plugin_${ARGOS_BUILD_FOR}_kilobot argos3plugin_${ARGOS_BUILD_FOR}_qtopengl)
-endif(ARGOS_COMPILE_QTOPENGL)
+#endif(ARGOS_COMPILE_QTOPENGL)
 
 #
 # Create kilolib
