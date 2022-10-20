@@ -1,0 +1,124 @@
+1234567
+/home/antoine/kilobots-gradientFollowing/argos/tuning/Instances/config_batch.txt
+1
+10
+1.12
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/antoine/kilobots-gradientFollowing/argos/build
+[  1%] Automatic MOC for target argos3plugin_simulator_kilolib
+[  1%] Built target argos3plugin_simulator_kilolib_autogen
+[  4%] Built target argos3plugin_simulator_kilolib
+[  5%] Automatic MOC for target argos3plugin_simulator_kilobot
+[  5%] Built target argos3plugin_simulator_kilobot_autogen
+[ 18%] Built target argos3plugin_simulator_kilobot
+[ 19%] Automatic MOC for target kilobot_diffusion
+[ 19%] Built target kilobot_diffusion_autogen
+[ 21%] Built target kilobot_diffusion
+[ 22%] Automatic MOC for target kilobot_phototaxis
+[ 22%] Built target kilobot_phototaxis_autogen
+[ 24%] Built target kilobot_phototaxis
+[ 25%] Automatic MOC for target test_debug
+[ 25%] Built target test_debug_autogen
+[ 27%] Built target test_debug
+[ 28%] Automatic MOC for target forager
+[ 28%] Built target forager_autogen
+[ 30%] Built target forager
+[ 31%] Automatic MOC for target sync
+[ 31%] Built target sync_autogen
+[ 33%] Built target sync
+[ 34%] Automatic MOC for target gradient_simple
+[ 34%] Built target gradient_simple_autogen
+[ 36%] Built target gradient_simple
+[ 37%] Automatic MOC for target blinky
+[ 37%] Built target blinky_autogen
+[ 39%] Built target blinky
+[ 40%] Automatic MOC for target custom_test_speaker
+[ 40%] Built target custom_test_speaker_autogen
+[ 42%] Built target custom_test_speaker
+[ 43%] Automatic MOC for target clustering
+[ 43%] Built target clustering_autogen
+[ 45%] Built target clustering
+[ 46%] Automatic MOC for target nonblocked_movement
+[ 46%] Built target nonblocked_movement_autogen
+[ 48%] Built target nonblocked_movement
+[ 49%] Automatic MOC for target simple_movement
+[ 49%] Built target simple_movement_autogen
+[ 51%] Built target simple_movement
+[ 52%] Automatic MOC for target test_listener
+[ 52%] Built target test_listener_autogen
+[ 54%] Built target test_listener
+[ 55%] Automatic MOC for target gradient_follower
+[ 55%] Built target gradient_follower_autogen
+[ 57%] Built target gradient_follower
+[ 58%] Automatic MOC for target test_listener_mod
+[ 58%] Built target test_listener_mod_autogen
+[ 60%] Built target test_listener_mod
+[ 61%] Automatic MOC for target test_speaker_mod
+[ 61%] Built target test_speaker_mod_autogen
+[ 63%] Built target test_speaker_mod
+[ 64%] Automatic MOC for target disperse
+[ 64%] Built target disperse_autogen
+[ 66%] Built target disperse
+[ 67%] Automatic MOC for target orbit_star
+[ 67%] Built target orbit_star_autogen
+[ 69%] Built target orbit_star
+[ 70%] Automatic MOC for target custom_test_listener
+[ 70%] Built target custom_test_listener_autogen
+[ 72%] Built target custom_test_listener
+[ 73%] Automatic MOC for target move_to_light
+[ 73%] Built target move_to_light_autogen
+[ 75%] Built target move_to_light
+[ 76%] Automatic MOC for target social_behavior
+[ 76%] Built target social_behavior_autogen
+Scanning dependencies of target social_behavior
+[ 77%] Building C object examples/behaviors/CMakeFiles/social_behavior.dir/social_behavior.c.o
+[ 78%] Linking CXX executable social_behavior
+[ 78%] Built target social_behavior
+[ 79%] Automatic MOC for target test_speaker
+[ 79%] Built target test_speaker_autogen
+[ 81%] Built target test_speaker
+[ 82%] Automatic MOC for target orbit_planet
+[ 82%] Built target orbit_planet_autogen
+[ 84%] Built target orbit_planet
+[ 85%] Automatic MOC for target debug_loop_functions
+[ 85%] Built target debug_loop_functions_autogen
+[ 87%] Built target debug_loop_functions
+[ 88%] Automatic MOC for target trajectory_loop_functions
+[ 88%] Built target trajectory_loop_functions_autogen
+[ 91%] Built target trajectory_loop_functions
+[ 92%] Automatic MOC for target ALF_clustering_loop_function
+[ 92%] Built target ALF_clustering_loop_function_autogen
+[ 94%] Built target ALF_clustering_loop_function
+[ 95%] Automatic MOC for target ALF_communication_loop_function
+[ 95%] Built target ALF_communication_loop_function_autogen
+[ 97%] Built target ALF_communication_loop_function
+[ 98%] Automatic MOC for target ALF_gradientFollowing_loop_function
+[ 98%] Built target ALF_gradientFollowing_loop_function_autogen
+[100%] Built target ALF_gradientFollowing_loop_function
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_spiri.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_qtopengl.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3core_simulator.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_kilobot.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_epuck.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_dynamics3d.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_eyebot.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_prototype.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_media.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_dynamics2d.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_footbot.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_pointmass3d.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_genericrobot.so[0m[1;32m"[0m
+[1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_entities.so[0m[1;32m"[0m
+[1;32m[INFO] Not using threads[0m
+[1;32m[INFO] Using random seed = [0m[1;32m1234567[0m
+[1;32m[INFO] Using simulation clock tick = [0m[1;32m0.1[0m
+[1;32m[INFO] Total experiment length in clock ticks = [0m[1;32m36000[0m
+[1;32m[INFO] Loaded library "[0m[1;32m./build/examples/loop_functions/ARK_loop_functions/gradientFollowing/libALF_gradientFollowing_loop_function.so[0m[1;32m"[0m
+Filename: seed#1_kiloLOG.tsv
+Arena size: 1	WA threshold: 0.434
+[1;32m[INFO] The physics engine "[0m[1;32mdyn2d[0m[1;32m" will perform [0m[1;32m10[0m[1;32m iterations per tick (dt = [0m[1;32m0.01[0m[1;32m sec)[0m
+[1;32m[INFO] No visualization selected.[0m
+[0m
+
+0.12

@@ -29,6 +29,13 @@ namespace argos {
       /* Get initial rotation */
       CRadians cTmp1, cTmp2;
       GetEmbodiedEntity().GetOriginAnchor().Orientation.ToEulerAngles(m_cYaw, cTmp1, cTmp2);
+      /* Set the anchor updaters */
+      RegisterAnchorMethod<CPointMass3DKilobotModel>(
+         GetEmbodiedEntity().GetAnchor("light"),
+         &CPointMass3DKilobotModel::UpdateLightAnchor);
+      RegisterAnchorMethod<CPointMass3DKilobotModel>(
+         GetEmbodiedEntity().GetAnchor("comm"),
+         &CPointMass3DKilobotModel::UpdateCommAnchor);
    }
 
    /****************************************/
@@ -92,6 +99,22 @@ namespace argos {
    void CPointMass3DKilobotModel::UpdateOriginAnchor(SAnchor& s_anchor) {
       s_anchor.Position = m_cPosition;
       s_anchor.Orientation = CQuaternion(m_cYaw, CVector3::Z);
+   }
+
+   /****************************************/
+   /****************************************/
+
+   void CPointMass3DKilobotModel::UpdateLightAnchor(SAnchor& s_anchor) {
+     s_anchor.Position = m_cPosition;
+     s_anchor.Orientation = CQuaternion(m_cYaw, CVector3::Z);
+   }
+
+   /****************************************/
+   /****************************************/
+
+   void CPointMass3DKilobotModel::UpdateCommAnchor(SAnchor& s_anchor) {
+     s_anchor.Position = m_cPosition;
+     s_anchor.Orientation = CQuaternion(m_cYaw, CVector3::Z);
    }
 
    /****************************************/

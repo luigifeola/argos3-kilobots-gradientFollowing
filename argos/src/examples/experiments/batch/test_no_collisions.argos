@@ -5,9 +5,9 @@
     <!-- * General configuration * -->
     <!-- ************************* -->
     <framework>
-        <experiment length="3600"
+        <experiment length="500"
         ticks_per_second="10"
-        random_seed="3" />
+        random_seed="123" />
     </framework>
 
     <!-- *************** -->
@@ -27,7 +27,7 @@
             <sensors>
                 <kilobot_communication implementation="default" medium="kilocomm" show_rays="true" />
             </sensors>
-            <params behavior="build/examples/behaviors/social_behavior" />
+            <params behavior="build/examples/behaviors/nonblocked_movement" />
         </kilobot_controller>
 
     </controllers>
@@ -35,7 +35,7 @@
     <!-- ****************** -->
     <!-- * Loop functions * -->
     <!-- ****************** -->
-    <loop_functions
+    <!-- <loop_functions
         library="build/examples/loop_functions/ARK_loop_functions/gradientFollowing/libALF_gradientFollowing_loop_function"
         label="ALF_gradientFollowing_loop_function" >
 
@@ -47,13 +47,13 @@
 
 
         <variables
-            kilo_filename="seed#3_kiloLOG.tsv"
+            kilo_filename="__ROBPOSOUTPUT__"
             dataacquisitionfrequency="10"
             environmentplotupdatefrequency="10">
         </variables>
 
 
-    </loop_functions>
+    </loop_functions> -->
     <!-- *********************** -->
     <!-- * Arena configuration * -->
     <!-- *********************** -->
@@ -74,18 +74,14 @@
 
 
         <distribute>
-            <position method="uniform" min="-0.48,-0.48,0" max="0.48,0.48,0" />
+            <position method="uniform" min="-0.48,-0.48,0.0" max="0.48,0.48,0.0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
-            <entity quantity="50" max_trials="100">
+            <entity quantity="1" max_trials="100">
                 <kilobot id="kb">
-                    <controller config="social_behavior"/> <dynamics2d friction="0.7" />
+                    <controller config="social_behavior"/>
                 </kilobot>
             </entity>
         </distribute>
-
-        <floor id="floor"
-        source="loop_functions"
-        pixels_per_meter="100" />
 
     </arena>
 
@@ -93,7 +89,8 @@
     <!-- * Physics engines * -->
     <!-- ******************* -->
     <physics_engines>
-        <dynamics2d id="dyn2d" />
+        <!-- <dynamics2d id="dyn2d" /> -->
+        <pointmass3d id="pm3d"/>
     </physics_engines>
 
     <!-- ********* -->

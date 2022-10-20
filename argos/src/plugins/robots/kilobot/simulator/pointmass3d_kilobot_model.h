@@ -39,6 +39,8 @@ namespace argos {
                                             const CRay3& c_ray) const;
 
       virtual void UpdateOriginAnchor(SAnchor& s_anchor);
+      void UpdateLightAnchor(SAnchor& s_anchor);
+      void UpdateCommAnchor(SAnchor& s_anchor);
 
    private:
 
