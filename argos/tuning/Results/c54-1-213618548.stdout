@@ -1,8 +1,8 @@
-1234567
+213618548
 /home/antoine/kilobots-gradientFollowing/argos/tuning/Instances/config_batch.txt
-1
-10
-1.12
+5
+8
+1.35
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/antoine/kilobots-gradientFollowing/argos/build
@@ -111,7 +111,7 @@ Scanning dependencies of target social_behavior
 [1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_genericrobot.so[0m[1;32m"[0m
 [1;32m[INFO] Loaded library "[0m[1;32m/usr/local/lib/argos3/libargos3plugin_simulator_entities.so[0m[1;32m"[0m
 [1;32m[INFO] Not using threads[0m
-[1;32m[INFO] Using random seed = [0m[1;32m1234567[0m
+[1;32m[INFO] Using random seed = [0m[1;32m213618548[0m
 [1;32m[INFO] Using simulation clock tick = [0m[1;32m0.1[0m
 [1;32m[INFO] Total experiment length in clock ticks = [0m[1;32m36000[0m
 [1;32m[INFO] Loaded library "[0m[1;32m./build/examples/loop_functions/ARK_loop_functions/gradientFollowing/libALF_gradientFollowing_loop_function.so[0m[1;32m"[0m
@@ -119,6 +119,3 @@ Filename: seed#1_kiloLOG.tsv
 Arena size: 1	WA threshold: 0.434
 [1;32m[INFO] The physics engine "[0m[1;32mdyn2d[0m[1;32m" will perform [0m[1;32m10[0m[1;32m iterations per tick (dt = [0m[1;32m0.01[0m[1;32m sec)[0m
 [1;32m[INFO] No visualization selected.[0m
-[0m
-
-0.12

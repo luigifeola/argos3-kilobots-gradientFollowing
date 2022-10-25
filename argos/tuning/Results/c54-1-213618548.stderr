@@ -19,4 +19,3 @@ fatal: No names found, cannot describe anything.
 /home/antoine/kilobots-gradientFollowing/argos/src/examples/behaviors/social_behavior.c:257:39: warning: statement with no effect [-Wunused-value]
   257 |                 max_turning_ticks * 2 - turning_ticks;
       |                 ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
-[0m

@@ -52,4 +52,4 @@ for time in range(36):
 
 df = pd.DataFrame(cluster_metric_array, columns=['cluster_metric'])
 print("\n")
-print(df["cluster_metric"].iloc[-1])
+print(-df["cluster_metric"].iloc[-1])
