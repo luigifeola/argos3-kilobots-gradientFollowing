@@ -5,9 +5,9 @@
     <!-- * General configuration * -->
     <!-- ************************* -->
     <framework>
-        <experiment length="__TIMEEXPERIMENT__"
+        <experiment length="3600"
         ticks_per_second="10"
-        random_seed="__SEED__" />
+        random_seed="1" />
     </framework>
 
     <!-- *************** -->
@@ -15,18 +15,19 @@
     <!-- *************** -->
     <controllers>
 
-        <kilobot_controller id="gradient_follower">
+        <kilobot_controller id="social_behavior">
             <actuators>
                 <differential_steering implementation="default"
                 bias_avg="0.00000"
                 bias_stddev="0.000"
                 />
+                <kilobot_communication implementation="default" />
                 <kilobot_led implementation="default" />
             </actuators>
             <sensors>
-                <kilobot_communication implementation="default" medium="kilocomm" show_rays="false" />
+                <kilobot_communication implementation="default" medium="kilocomm" show_rays="true" />
             </sensors>
-            <params behavior="build/examples/behaviors/gradient_follower" />
+            <params behavior="build/examples/behaviors/social_behavior" />
         </kilobot_controller>
 
     </controllers>
@@ -46,7 +47,7 @@
 
 
         <variables
-            kilo_filename="__ROBPOSOUTPUT__"
+            kilo_filename="seed#1_kiloLOG.tsv"
             dataacquisitionfrequency="10"
             environmentplotupdatefrequency="10">
         </variables>
@@ -73,11 +74,11 @@
 
 
         <distribute>
-            <position method="uniform" min="-0.48,-0.48,0" max="0.48,0.48,0" />
+            <position method="uniform" min="-0.48,-0.48,0.0" max="0.48,0.48,0.0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
-            <entity quantity="__NUMROBOTS__" max_trials="100">
+            <entity quantity="50" max_trials="100">
                 <kilobot id="kb">
-                    <controller config="gradient_follower"/> <dynamics2d friction="0.7" />
+                    <controller config="social_behavior"/> <dynamics2d friction="0.7" />
                 </kilobot>
             </entity>
         </distribute>
@@ -93,6 +94,7 @@
     <!-- ******************* -->
     <physics_engines>
         <dynamics2d id="dyn2d" />
+        <!-- <pointmass3d id="pm3d"/> -->
     </physics_engines>
 
     <!-- ********* -->
@@ -106,7 +108,7 @@
     <!-- ****************** -->
     <!-- * Visualization  * -->
     <!-- ****************** -->
-    <!-- <visualization>
+    <visualization>
         <qt-opengl>
             <camera>
                 <placement idx="0" position="0.0,-0.00001,0.5" look_at="0,0,0" lens_focal_length="12"/>
@@ -115,6 +117,6 @@
                 <placement idx="3" position="-0.0229259,-0.177184,0.0725521" look_at="0.0273839,0.812385,-0.0624333" lens_focal_length="20" />
             </camera>
         </qt-opengl>
-    </visualization> -->
+    </visualization>
 
 </argos-configuration>
