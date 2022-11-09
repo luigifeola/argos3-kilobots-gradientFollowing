@@ -32,7 +32,7 @@ motion_t current_motion_type = STOP; // Current motion type
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-const float std_motion_steps = 8 * 2;       // variance of the gaussian used to compute forward motion
+const float std_motion_steps = 8 * 1;       // variance of the gaussian used to compute forward motion
 float levy_exponent = 2.0;             // 2 is brownian like motion (alpha)
 float crw_exponent = 0.0;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
@@ -370,12 +370,12 @@ void sampling_neighbors()
 
   int threshold1 = 3;
   int threshold2 = 4;
-  double alpha1 = 1.22;
-  double alpha2 = 1.77;
-  double alpha3 = 1.95;
-  double rho1 = 0.96;
-  double rho2 = 0.53;
-  double rho3 = 0.13;
+  double alpha1 = 1.27;
+  double alpha2 = 1.78;
+  double alpha3 = 1.94;
+  double rho1 = 0.97;
+  double rho2 = 0.55;
+  double rho3 = 0.18;
   if(neighbors_count < threshold1)
   {
     levy_exponent = alpha1;

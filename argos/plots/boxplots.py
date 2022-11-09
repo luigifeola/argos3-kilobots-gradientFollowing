@@ -63,5 +63,6 @@ for k in range(10):
     boxplot_df['config_' + str(k)] = totalResults
 
 boxplot = boxplot_df.boxplot(column = ['config_0', 'config_1', 'config_2', 'config_3', 'config_4', 'config_5', 'config_6', 'config_7', 'config_8', 'config_9'])
+boxplot.set_ylim(0,1)
 boxplot.plot()
 plt.show()

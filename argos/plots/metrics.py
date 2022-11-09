@@ -14,7 +14,7 @@ for seed in range(30):
     # if seed == 17:
     #     continue
     print("Dataframe " + str(seed))
-    data = pd.read_csv ("../results/social_behavior/irace_behavior_config_7/seed#" + str(seed+1) + "_kiloLOG.tsv", sep = '\t')
+    data = pd.read_csv ("../results/social_behavior/social_behavior_2022-10-25-11:06_3600_seconds/seed#" + str(seed+1) + "_kiloLOG.tsv", sep = '\t')
     columnsToDrop = []
     for i in range(25):
         columnsToDrop.append(4+i*4+i)
@@ -71,4 +71,9 @@ df_medians.plot(kind='line', y='cluster_metric', color = 'blue', ax=ax, ylim=(0,
 df_quantile25.plot(kind='line', y='cluster_metric', color = 'blue', ax=ax, ylim=(0,1), legend=False)
 df_quantile75.plot(kind='line', y='cluster_metric', color = 'blue', ax=ax, ylim=(0,1), legend=False)
 plt.fill_between(df_medians.index, df_quantile25.cluster_metric, df_quantile75.cluster_metric)
+plt.show()
+
+ax = plt.gca()
+for dataframe in totalResults:
+    dataframe.plot(kind='line', y='cluster_metric', ax=ax, ylim=(0,1))
 plt.show()

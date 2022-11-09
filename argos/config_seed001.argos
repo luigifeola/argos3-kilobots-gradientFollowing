@@ -5,9 +5,9 @@
     <!-- * General configuration * -->
     <!-- ************************* -->
     <framework>
-        <experiment length="__TIMEEXPERIMENT__"
+        <experiment length="3600"
         ticks_per_second="10"
-        random_seed="__SEED__" />
+        random_seed="1" />
     </framework>
 
     <!-- *************** -->
@@ -47,7 +47,7 @@
 
 
         <variables
-            kilo_filename="__ROBPOSOUTPUT__"
+            kilo_filename="seed#1_kiloLOG.tsv"
             dataacquisitionfrequency="10"
             environmentplotupdatefrequency="10">
         </variables>
@@ -76,7 +76,7 @@
         <distribute>
             <position method="uniform" min="-0.48,-0.48,0.0" max="0.48,0.48,0.0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
-            <entity quantity="__NUMROBOTS__" max_trials="100">
+            <entity quantity="50" max_trials="100">
                 <kilobot id="kb">
                     <controller config="social_behavior"/> <dynamics2d friction="0.7" />
                 </kilobot>
