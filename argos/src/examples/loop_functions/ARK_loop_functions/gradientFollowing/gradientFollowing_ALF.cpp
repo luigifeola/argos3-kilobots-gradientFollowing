@@ -25,10 +25,27 @@ namespace
     const CVector2 left_direction(1.0, 0.0);
     const CVector2 right_direction(-1.0, 0.0);
     const int kProximity_bits = 8;
+    const int digitize_bits = 2;
 
     // log time counter
     int internal_counter = 0;
 
+    typedef enum
+    {
+        CONTINUOUS = 0,
+        DISCRETE = 1,
+        NO_BACKGROUND = 2
+    } Background;
+
+    typedef enum
+    {
+        BITS_2 = 2,
+        BITS_3 = 3,
+        BITS_4 = 4
+    } Discretization;
+
+    Background background_flag = DISCRETE;
+    Discretization discret_bits = BITS_4;
 }
 
 /****************************************/
@@ -206,22 +223,38 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
     tKilobotMessage.m_sID = unKilobotID;
     tKilobotMessage.m_sData = 0;
 
-    if (m_vecKilobotsLightSensors[unKilobotID] == CColor::BLACK)
-    {
-        tKilobotMessage.m_sType = kBLACK;
-    }
-    else if (m_vecKilobotsLightSensors[unKilobotID] == CColor::GRAY30)
-    {
-        tKilobotMessage.m_sType = kGRAY;
-    }
-    else if (m_vecKilobotsLightSensors[unKilobotID] == CColor::WHITE)
+    std::cout<< "Tograyscale " << m_vecKilobotsLightSensors[unKilobotID].ToGrayScale() << std::endl;
+
+    Real fDistance = Distance(m_vecKilobotsPositions[unKilobotID], CVector2(0.0, 0.0));
+    Real headindIndex = fDistance/(vArena_size/2.0);
+    const Real MAX_VAL = 1.0;
+    const Real NUM_SYMBOLS = 3.0;
+    // Real symbol1 = ((headindIndex * NUM_SYMBOLS) / MAX_VAL) + 0.5;
+    Real symbol = static_cast<int>(((headindIndex * NUM_SYMBOLS) / MAX_VAL)); // Add 0.5 for rounding.
+    std::cout << "symbol1 " << symbol << std::endl;
+    tKilobotMessage.m_sType = symbol;
+
+    if (fDistance > (vArena_size/2.0))
     {
         tKilobotMessage.m_sType = kWHITE;
     }
-    else if (m_vecKilobotsLightSensors[unKilobotID] != CColor::ORANGE)
-    {
-        std::cout << "Error, wrong floor colour " << m_vecKilobotsLightSensors[unKilobotID] << "\n";
-    }
+
+    // if (m_vecKilobotsLightSensors[unKilobotID] == CColor::BLACK)
+    // {
+        // tKilobotMessage.m_sType = kBLACK;
+    // }
+    // else if (m_vecKilobotsLightSensors[unKilobotID] == CColor::GRAY30)
+    // {
+    //     tKilobotMessage.m_sType = kGRAY;
+    // }
+    // else if (m_vecKilobotsLightSensors[unKilobotID] == CColor::WHITE)
+    // {
+    //     tKilobotMessage.m_sType = kWHITE;
+    // }
+    // else if (m_vecKilobotsLightSensors[unKilobotID] != CColor::ORANGE)
+    // {
+    //     std::cout << "Error, wrong floor colour " << m_vecKilobotsLightSensors[unKilobotID] << "\n";
+    // }
 
     /* check for robot collisions with walls */
     UInt8 proximity_sensor_dec = 0; // 8 bit proximity sensor as decimal
@@ -326,19 +359,14 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
 
 void GradientFollowingCALF::KiloLOG()
 {
+    // std::cout << std::noshowpos << std::setw(4) << std::setprecision(0) << std::setfill('0')
+    //           << m_fTimeInSeconds << '\t';
     m_kiloOutput
         << std::noshowpos << std::setw(4) << std::setprecision(0) << std::setfill('0')
         << m_fTimeInSeconds << '\t';
     for (size_t kID = 0; kID < m_vecKilobotsPositions.size(); kID++)
     {
         m_kiloOutput
-            // << kID << '\t'
-            // << m_vecKilobotStates_ALF[kID] << '\t' //TODO: this should be the colour, but for now is the state
-            // << m_vecKilobotsPositions[kID].GetX() << '\t'
-            // << m_vecKilobotsPositions[kID].GetY() << '\t'
-            // << m_vecKilobotsOrientations[kID] << '\t'
-            // << m_vecKilobotStates_ALF[kID];
-
             // << std::noshowpos
             << std::noshowpos << std::setw(2) << std::setprecision(0) << std::setfill('0')
             << kID << '\t'
@@ -350,8 +378,17 @@ void GradientFollowingCALF::KiloLOG()
             << m_vecKilobotsOrientations[kID].GetValue() << '\t'
             << std::noshowpos << std::setw(1) << std::setprecision(0)
             << m_vecKilobotsLightSensors[kID] << '\t';
+
+        // std::cout
+        //     << std::noshowpos << std::setw(2) << std::setprecision(0) << std::setfill('0')
+        //     << kID << " - "
+        //     << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
+        //     << m_vecKilobotsPositions[kID].GetX() << " - "
+        //     << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
+        //     << m_vecKilobotsPositions[kID].GetY() << " - ";
     }
     m_kiloOutput << std::endl;
+    // std::cout << std::endl;
 }
 
 /****************************************/
@@ -366,43 +403,102 @@ CColor GradientFollowingCALF::GetFloorColor(const CVector2 &vec_position_on_plan
     Real max_distance = vArena_size / 2.0;
 
     Real fDistance = Distance(vec_position_on_plane, gradient_pos);
-    if (fDistance <= max_distance * 2.0 / 3.0 && fDistance > max_distance * 1.0 / 3.0)
+
+    switch (background_flag)
     {
-        cColor = CColor::GRAY30;
+    case CONTINUOUS:
+        if (fDistance < max_distance)
+        {
+            Real col = 255.0 * (fDistance / max_distance);
+            cColor = CColor(col, col, col, 1);
+        }
+        break;
+
+    case DISCRETE:
+        
+        switch (discret_bits)
+        {
+        case BITS_2:
+            if (fDistance <= max_distance * 1.0 / 2.0)
+            {
+                cColor = CColor::BLACK;
+            }
+            break;
+
+        case BITS_3:
+            if (fDistance <= max_distance * 2.0 / 3.0 && fDistance > max_distance * 1.0 / 3.0)
+            {
+                cColor = CColor::GRAY30;
+            }
+            if (fDistance <= max_distance * 1.0 / 3.0)
+            {
+                cColor = CColor::BLACK;
+            }
+            break;
+
+        case BITS_4:
+            if (fDistance <= max_distance * 3.0 / 4.0 && fDistance > max_distance * 2.0 / 4.0)
+            {
+                cColor = CColor::GRAY60;
+            }
+
+            if (fDistance <= max_distance * 2.0 / 4.0 && fDistance > max_distance * 1.0 / 4.0)
+            {
+                cColor = CColor::GRAY30;
+            }
+
+            else if (fDistance <= max_distance * 1.0 / 4.0)
+            {
+                cColor = CColor::BLACK;
+            }
+            break;
+
+        default:
+            break;
+        }
+
+
+
+        
+        break;
+
+    case NO_BACKGROUND:
+    default:
+        break;
     }
 
-    else if (fDistance <= max_distance * 1.0 / 3.0)
-    {
-        cColor = CColor::BLACK;
-    }
 
-    /**Boarder for wall avoidance*/
-    // Top border for wall avoidance
-    if (vec_position_on_plane.GetY() < vDistance_threshold + 0.005 && vec_position_on_plane.GetY() > vDistance_threshold - 0.005)
-    {
-        cColor = CColor::ORANGE;
-    }
-    // Bottom border for wall avoidance
-    if (vec_position_on_plane.GetY() < -1.0 * (vDistance_threshold - 0.005) && vec_position_on_plane.GetY() > -1 * (vDistance_threshold + 0.005))
-    {
-        cColor = CColor::ORANGE;
-    }
-    // Right border for wall avoidance
-    if (vec_position_on_plane.GetX() < vDistance_threshold + 0.005 && vec_position_on_plane.GetX() > vDistance_threshold - 0.005)
-    {
-        cColor = CColor::ORANGE;
-    }
-    // Left border for wall avoidance
-    if (vec_position_on_plane.GetX() < -1.0 * (vDistance_threshold - 0.005) && vec_position_on_plane.GetX() > -1 * (vDistance_threshold + 0.005))
-    {
-        cColor = CColor::ORANGE;
-    }
-
-    // Real fKiloVision = Distance(vec_position_on_plane, m_vecKilobotsPositions[6]);
-    // if (fKiloVision < 0.05 && fKiloVision > 0.04)
+    /****************************Boarder for wall avoidance*************************************************************************************************/
+    // // Top border for wall avoidance
+    // if (vec_position_on_plane.GetY() < vDistance_threshold + 0.005 && vec_position_on_plane.GetY() > vDistance_threshold - 0.005)
     // {
-    //     // cColor = CColor(0, 0, 125, 0);
     //     cColor = CColor::ORANGE;
+    // }
+    // // Bottom border for wall avoidance
+    // if (vec_position_on_plane.GetY() < -1.0 * (vDistance_threshold - 0.005) && vec_position_on_plane.GetY() > -1 * (vDistance_threshold + 0.005))
+    // {
+    //     cColor = CColor::ORANGE;
+    // }
+    // // Right border for wall avoidance
+    // if (vec_position_on_plane.GetX() < vDistance_threshold + 0.005 && vec_position_on_plane.GetX() > vDistance_threshold - 0.005)
+    // {
+    //     cColor = CColor::ORANGE;
+    // }
+    // // Left border for wall avoidance
+    // if (vec_position_on_plane.GetX() < -1.0 * (vDistance_threshold - 0.005) && vec_position_on_plane.GetX() > -1 * (vDistance_threshold + 0.005))
+    // {
+    //     cColor = CColor::ORANGE;
+    // }
+
+    /****************************Communication range*************************************************************************************************/
+    // for(auto kID : m_vecKilobotsPositions)
+    // {
+    //     Real fKiloVision = Distance(vec_position_on_plane, kID);
+    //     if (fKiloVision < 0.1 && fKiloVision > 0.09)
+    //     {
+    //         // cColor = CColor(0, 0, 125, 0);
+    //         cColor = CColor::ORANGE;
+    //     }
     // }
 
     return cColor;
