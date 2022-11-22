@@ -32,7 +32,7 @@ motion_t current_motion_type = STOP; // Current motion type
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-const float std_motion_steps = 8 * 1;       // variance of the gaussian used to compute forward motion
+float std_motion_steps = 8 * 1;       // variance of the gaussian used to compute forward motion
 float levy_exponent = 2.0;             // 2 is brownian like motion (alpha)
 float crw_exponent = 0.0;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
@@ -409,7 +409,6 @@ void sampling_neighbors2()
     }
     broadcasting_robots[i].id = 0;
   }
-
   int threshold1 = 4;
   int threshold2 = 1;
   double alpha1 = 1.45;

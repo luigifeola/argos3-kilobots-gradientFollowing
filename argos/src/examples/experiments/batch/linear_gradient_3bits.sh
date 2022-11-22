@@ -24,7 +24,7 @@ res_dir=$wdir/"results/linear_gradient"
 if [[ ! -e $res_dir ]]; then
     cmake -E make_directory $res_dir
 # else
-#     echo "Error: directory '$res_dir' already exists" 
+#     echo "Error: directory '$res_dir' already exists"
 #     exit 1
 fi
 
@@ -34,7 +34,7 @@ base_dir=`dirname $base_config_s`
 # echo base_dir $base_dir
 echo "$CONFIGURATION_FILE" | egrep "^$SHARED_DIR" &> /dev/null || exit 1
 
-numrobots="20"
+numrobots="25"
 
 ###################################
 # experiment_length is in seconds #
@@ -63,12 +63,12 @@ for it in $(seq 1 $RUNS); do
     echo $robot_positions_file
     sed -i "s|__ROBPOSOUTPUT__|$robot_positions_file|g" $config
 
-    
-    
+
+
     echo "Running next configuration seed $it with $numrobots robots"
     echo "argos3 -c $1$config"
     argos3 -c './'$config
-    
+
     mv *.tsv $param_dir
     rm *.argos
 done

@@ -39,7 +39,7 @@ motion_t current_motion_type = STOP; // Current motion type
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-const float std_motion_steps = 10;       // variance of the gaussian used to compute forward motion
+float std_motion_steps = 10;       // variance of the gaussian used to compute forward motion
 float levy_exponent = 2.0;             // 2 is brownian like motion (alpha)
 float crw_exponent = 0.0;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
@@ -59,6 +59,8 @@ Free_space free_space = LEFT;
 bool wall_avoidance_start = false;
 
 /* ---------------------------------------------- */
+// Robot messages to signal presence
+message_t msg; //msg to send
 // Variables for Smart Arena messages
 int sa_type = 0;
 int sa_payload = 0;
@@ -122,19 +124,22 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     switch (sa_type)
     {
     case kBLACK:
-        set_color(RGB(3, 3, 0));
-        levy_exponent = 1.986;
-        crw_exponent = 0.0161;
+        // set_color(RGB(3, 3, 0));
+        std_motion_steps = 8;
+        levy_exponent = 1.95;
+        crw_exponent = 0.04;
         break;
     case kGRAY:
-        set_color(RGB(3, 0, 0));
-        levy_exponent = 1.6898;
-        crw_exponent = 0.1489;
+        // set_color(RGB(3, 0, 0));
+        std_motion_steps = 32;
+        levy_exponent = 1.99;
+        crw_exponent = 0.02;
         break;
     case kWHITE:
-        set_color(RGB(0, 0, 3));
-        levy_exponent = 1.0174;
-        crw_exponent = 0.9109;
+        // set_color(RGB(0, 0, 3));
+        std_motion_steps = 32;
+        levy_exponent = 1.0;
+        crw_exponent = 0.95;
         break;
 
     default:
@@ -200,6 +205,14 @@ void rx_message(message_t *msg, distance_measurement_t *d)
 }
 
 /*-------------------------------------------------------------------*/
+/* Sending message                                                   */
+/*-------------------------------------------------------------------*/
+message_t *message_tx()
+{
+  return &msg;
+}
+
+/*-------------------------------------------------------------------*/
 /* Function implementing the LMCRW random walk                       */
 /*-------------------------------------------------------------------*/
 
@@ -224,7 +237,7 @@ void random_walk()
         {
             /* perform a random turn */
             last_motion_ticks = kilo_ticks;
-            
+
             double angle = 0;
             if (crw_exponent == 0)
             {
@@ -260,6 +273,11 @@ void random_walk()
 /*-------------------------------------------------------------------*/
 void setup()
 {
+  msg.type = 10;
+  msg.data[0] = kilo_uid;
+  msg.crc = message_crc(&msg);
+  // Register the message_tx callback function.
+  kilo_message_tx = message_tx;
     /* Initialise LED and motors */
 #ifdef ARGOS_SIMULATION
     set_color(RGB(0, 0, 0));
@@ -366,6 +384,6 @@ int main()
     kilo_init();
     kilo_message_rx = rx_message;
     kilo_start(setup, loop);
-    
+
     return 0;
 }
