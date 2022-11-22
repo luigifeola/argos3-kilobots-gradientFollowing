@@ -34,7 +34,7 @@ base_dir=`dirname $base_config_s`
 # echo base_dir $base_dir
 echo "$CONFIGURATION_FILE" | egrep "^$SHARED_DIR" &> /dev/null || exit 1
 
-numrobots="20"
+numrobots="25"
 
 ###################################
 # experiment_length is in seconds #

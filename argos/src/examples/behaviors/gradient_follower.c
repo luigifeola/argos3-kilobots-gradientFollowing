@@ -7,6 +7,7 @@
 #define COLLISION_BITS 8
 #define SECTORS_IN_COLLISION 2
 #define ARGOS_SIMULATION
+#define SCALING_STD 8
 
 typedef enum
 { // Enum for different motion types
@@ -31,8 +32,9 @@ typedef enum
 typedef enum
 {
     kBLACK = 0,
+    kWHITE = 2,
     kGRAY = 1,
-    kWHITE = 2
+    kLIGHTGRAY = 3,
 } Light_sensor;
 
 motion_t current_motion_type = STOP; // Current motion type
@@ -40,7 +42,7 @@ motion_t pivot = STOP;               // select the pivot, if always left or alwa
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-const float std_motion_steps = 10;       // variance of the gaussian used to compute forward motion
+float std_motion_steps = 2;       // variance of the gaussian used to compute forward motion
 float levy_exponent = 2.0;             // 2 is brownian like motion (alpha)
 float crw_exponent = 0.0;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
@@ -71,6 +73,31 @@ uint8_t start = 0; // waiting from ARK a start signal to run the experiment 0 : 
 #endif
 
 /*-------------------------------------------------------------------*/
+/* Function for setting the led colour                               */
+/*-------------------------------------------------------------------*/
+void set_led()
+{
+    switch (light_sensor)
+    {
+    case kBLACK:
+        set_color(RGB(3, 3, 3));
+        break;
+    case kGRAY:
+        set_color(RGB(0, 0, 3));
+        break;
+    case kLIGHTGRAY:
+        set_color(RGB(3, 0, 0));
+        break;
+    case kWHITE:
+        set_color(RGB(0, 3, 0));
+        break;
+
+    default:
+        break;
+    }
+}
+
+/*-------------------------------------------------------------------*/
 /* Function for setting the motor speed                              */
 /*-------------------------------------------------------------------*/
 void set_motion(motion_t new_motion_type)
@@ -86,14 +113,10 @@ void set_motion(motion_t new_motion_type)
         case TURN_RIGHT:
             spinup_motors();
             set_motors(0, kilo_turn_right);
-            // if (kilo_uid == 6)
-            //     set_color(RGB(3, 0, 3));
             break;
         case TURN_LEFT:
             spinup_motors();
             set_motors(kilo_turn_left, 0);
-            // if (kilo_uid == 6)
-            //     set_color(RGB(3, 3, 3));
             break;
         case STOP:
         default:
@@ -116,26 +139,56 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
 
     light_sensor = sa_type;
 
+
     // printf("sa_type: %d\n", sa_type);
     // printf("sa_payload: %d\n", sa_payload);
+    /*
+    2 Bits
+    --std 1 --a0 1.98 --r0 0.01 --a1 1.01 --r1 0.97
 
+    --std 1 --a0 1.94 --r0 0.03 --a1 1.01 --r1 0.98
 
+    --std 1 --a0 1.97 --r0 0.02 --a1 1 --r1 0.98
+
+    3 Bits
+    --std 2 --a0 1.95 --r0 0.04 --a1 1.99 --r1 0.02 --a2 1 --r2 0.95
+
+    --std 2 --a0 1.94 --r0 0.04 --a1 1.99 --r1 0.02 --a2 1 --r2 0.94
+
+    --std 2 --a0 1.94 --r0 0.02 --a1 1.99 --r1 0 --a2 1.03 --r2 0.93
+
+    4 Bits
+    --std 1 --a0 1.95 --r0 0.44 --a1 1.99 --r1 0.0 --a2 1.02 --r2 0.25 --a3 1.0 --r3 0.96
+
+    --std 2 --a0 1.99 --r0 0.0 --a1 1.99 --r1 0.0 --a2 1.13 --r2 0.01 --a3 1.02 --r3 0.95
+
+    --std 1 --a0 1.98 --r0 0.76 --a1 1.99 --r1 0.0 --a2 1.01 --r2 0.59 --a3 1.01 --r3 0.97
+    */
     switch (sa_type)
     {
     case kBLACK:
-        set_color(RGB(3, 3, 0));
-        levy_exponent = 1.0;
-        crw_exponent = 0.99;
+        levy_exponent = 1.95;
+        crw_exponent = 0.04;
+        // printf("Black\n");
         break;
     case kGRAY:
-        set_color(RGB(3, 0, 0));
-        levy_exponent = 1.0;
-        crw_exponent = 0.99;
+        levy_exponent = 1.99;
+        crw_exponent = 0.02;
+        // printf("Gray\n");
+        // printf("Error to many bits!!!!!\n");
+        // printf("Error to many bits!!!!!\n");
+        break;
+    case kLIGHTGRAY:
+        levy_exponent = 1.13;
+        crw_exponent = 0.01;
+        // printf("LightGray\n");
+        // printf("Error to many bits!!!!!\n");
+        // printf("Error to many bits!!!!!\n");
         break;
     case kWHITE:
-        set_color(RGB(0, 0, 3));
         levy_exponent = 1.0;
-        crw_exponent = 0.99;
+        crw_exponent = 0.95;
+        // printf("White\n");
         break;
 
     default:
@@ -215,6 +268,7 @@ void random_walk()
         {
             /* start moving forward */
             last_motion_ticks = kilo_ticks;
+            set_led();
             set_motion(FORWARD);
         }
         break;
@@ -236,8 +290,7 @@ void random_walk()
                 angle = fabs(wrapped_cauchy_ppf(crw_exponent));
             }
             turning_ticks = (uint32_t)((angle / M_PI) * max_turning_ticks);
-            straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
-
+            straight_ticks = SCALING_STD * (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
 
             if (rand_soft() % 2)
             {
@@ -338,7 +391,7 @@ void wall_avoidance_procedure(uint8_t sensor_readings)
         if (kilo_ticks > last_motion_ticks + turning_ticks)
         {
             turning_ticks = (uint32_t)((M_PI / COLLISION_BITS) * max_turning_ticks);
-            straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
+            straight_ticks = SCALING_STD * (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
         }
     }
 }

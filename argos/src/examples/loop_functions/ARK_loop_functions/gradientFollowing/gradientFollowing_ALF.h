@@ -23,8 +23,9 @@ namespace argos
 typedef enum
 {
     kBLACK = 0,
+    kWHITE = 2,
     kGRAY = 1,
-    kWHITE = 2
+    kLIGHTGRAY = 3,
 } light_sensor;
 
 
@@ -77,6 +78,8 @@ public:
     virtual void Destroy();
 
     virtual void PostStep();
+
+    virtual void PostExperiment();
 
     /** Get a Vector of all the Kilobots in the space */
     void GetKilobotsEntities();
@@ -139,14 +142,11 @@ private:
 
     /* Kilobots properties */
     std::vector<CVector2> m_vecKilobotsPositions;
-    std::vector<CColor> m_vecKilobotsLightSensors;
     std::vector<CRadians> m_vecKilobotsOrientations;
+    std::vector<Real> m_vecKilobotsLightSensors;
 
     /** Gradient field radius */
     Real m_fGradientFieldRadius;
-
-    /** Gradiant field color*/
-    CColor m_cGradientFieldColor;
 
     /** output file for data acquizition */
     std::ofstream m_cOutput;
