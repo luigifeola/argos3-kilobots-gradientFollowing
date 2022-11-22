@@ -36,6 +36,7 @@ typedef enum
 } Light_sensor;
 
 motion_t current_motion_type = STOP; // Current motion type
+motion_t pivot = STOP;               // select the pivot, if always left or always right
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
@@ -250,15 +251,14 @@ void random_walk()
             turning_ticks = (uint32_t)((angle / M_PI) * max_turning_ticks);
             straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
 
+
             if (rand_soft() % 2)
             {
-                set_motion(TURN_LEFT);
+                turning_ticks = max_turning_ticks * 2 - turning_ticks;
             }
-            else
-            {
-                max_turning_ticks * 2 - turning_ticks;
-                set_motion(TURN_LEFT);
-            }
+            
+            set_motion(pivot);
+            
         }
         break;
 
@@ -291,6 +291,15 @@ void setup()
     rand_seed(seed);
     seed = rand_hard();
     srand(seed);
+
+    if (rand_soft() % 2)
+    {
+        pivot = TURN_LEFT;
+    }
+    else
+    {
+        pivot = TURN_RIGHT;
+    }
 
 #ifdef ARGOS_SIMULATION
     set_motion(FORWARD);
