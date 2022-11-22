@@ -279,7 +279,7 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
     {
         // if(unKilobotID == 6)
         //     std::cout<< "kID:" << unKilobotID << "\n";
-        
+
         std::vector<int> proximity_vec;
         if (m_vecKilobotsPositions[unKilobotID].GetX() > vDistance_threshold)
         {
@@ -374,20 +374,25 @@ void GradientFollowingCALF::KiloLOG()
     m_kiloOutput
         << std::noshowpos << std::setw(4) << std::setprecision(0) << std::setfill('0')
         << m_fTimeInSeconds << '\t';
-    for (size_t kID = 0; kID < m_vecKilobotsPositions.size(); kID++)
+    size_t kID = 0;
+    for (UInt16 it = 0; it < m_tKilobotEntities.size(); it++)
     {
+        // argos::LOG<< kID <<std::endl;
+        // argos::LOG<< m_vecKilobotsPositions[kID].GetX() <<std::endl;
+        // argos::LOG<< m_vecKilobotsPositions[kID].GetY() <<std::endl;
         m_kiloOutput
             // << std::noshowpos
             << std::noshowpos << std::setw(2) << std::setprecision(0) << std::setfill('0')
             << kID << '\t'
             << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
-            << m_vecKilobotsPositions[kID].GetX() << '\t'
+            << GetKilobotPosition(*m_tKilobotEntities[it]).GetX() << '\t'
             << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
-            << m_vecKilobotsPositions[kID].GetY() << '\t'
+            << GetKilobotPosition(*m_tKilobotEntities[it]).GetY() << '\t'
             << std::internal << std::showpos << std::setw(6) << std::setprecision(4) << std::setfill('0') << std::fixed
-            << m_vecKilobotsOrientations[kID].GetValue() << '\t'
-            << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
-            << m_vecKilobotsLightSensors[kID] << '\t';
+            << GetKilobotOrientation(*m_tKilobotEntities[it]).GetValue() << '\t'
+            << std::noshowpos << std::setw(1) << std::setprecision(0)
+            << GetFloorColor(GetKilobotPosition(*m_tKilobotEntities[it])) << '\t';
+            kID++;
     }
     m_kiloOutput << std::endl;
 }

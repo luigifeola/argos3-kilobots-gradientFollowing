@@ -62,6 +62,8 @@ Free_space free_space = LEFT;
 bool wall_avoidance_start = false;
 
 /* ---------------------------------------------- */
+// Robot messages to signal presence
+message_t msg; //msg to send
 // Variables for Smart Arena messages
 int sa_type = 0;
 int sa_payload = 0;
@@ -254,6 +256,14 @@ void rx_message(message_t *msg, distance_measurement_t *d)
 }
 
 /*-------------------------------------------------------------------*/
+/* Sending message                                                   */
+/*-------------------------------------------------------------------*/
+message_t *message_tx()
+{
+  return &msg;
+}
+
+/*-------------------------------------------------------------------*/
 /* Function implementing the LMCRW random walk                       */
 /*-------------------------------------------------------------------*/
 
@@ -279,7 +289,7 @@ void random_walk()
         {
             /* perform a random turn */
             last_motion_ticks = kilo_ticks;
-            
+
             double angle = 0;
             if (crw_exponent == 0)
             {
@@ -313,6 +323,11 @@ void random_walk()
 /*-------------------------------------------------------------------*/
 void setup()
 {
+  msg.type = 10;
+  msg.data[0] = kilo_uid;
+  msg.crc = message_crc(&msg);
+  // Register the message_tx callback function.
+  kilo_message_tx = message_tx;
     /* Initialise LED and motors */
 #ifdef ARGOS_SIMULATION
     set_color(RGB(0, 0, 0));
@@ -428,6 +443,6 @@ int main()
     kilo_init();
     kilo_message_rx = rx_message;
     kilo_start(setup, loop);
-    
+
     return 0;
 }
