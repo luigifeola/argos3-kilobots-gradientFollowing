@@ -25,7 +25,6 @@ namespace
     const CVector2 left_direction(1.0, 0.0);
     const CVector2 right_direction(-1.0, 0.0);
     const int kProximity_bits = 8;
-    const int digitize_bits = 2;
 
     // log time counter
     int internal_counter = 0;
@@ -46,6 +45,10 @@ namespace
 
     Background background_flag = DISCRETE;
     Discretization discret_bits = BITS_4;
+
+    const Real MAX_VAL = 1.0;
+    const Real NUM_SYMBOLS = Real(discret_bits);
+    Real overall_gradient = 0.0;
 }
 
 /****************************************/
@@ -99,6 +102,8 @@ void GradientFollowingCALF::PostStep()
     {
         KiloLOG();
     }
+
+    // std::cout << "Overall gradient:" << (overall_gradient / m_tKilobotEntities.size()) / internal_counter << std::endl;
 }
 
 /****************************************/
@@ -203,7 +208,6 @@ void GradientFollowingCALF::UpdateKilobotState(CKilobotEntity &c_kilobot_entity)
 {
     UInt16 unKilobotID = GetKilobotId(c_kilobot_entity);
     m_vecKilobotsPositions[unKilobotID] = GetKilobotPosition(c_kilobot_entity);
-    m_vecKilobotsLightSensors[unKilobotID] = GetFloorColor(m_vecKilobotsPositions[unKilobotID]);
     m_vecKilobotsOrientations[unKilobotID] = GetKilobotOrientation(c_kilobot_entity);
 }
 
@@ -215,7 +219,7 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
     /* Create ARK-type messages variables */
     m_tALFKilobotMessage tKilobotMessage, tEmptyMessage, tMessage;
 
-    /* Flag for existance of message to send */
+    /* Flag for existence of message to send */
     bool bMessageToSend = true;
 
     /* Get the kilobot ID and state (Position and Orientation in this example*/
@@ -223,39 +227,45 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
     tKilobotMessage.m_sID = unKilobotID;
     tKilobotMessage.m_sData = 0;
 
-    std::cout<< "Tograyscale " << m_vecKilobotsLightSensors[unKilobotID].ToGrayScale() << std::endl;
+    // std::cout<< "Tograyscale " << m_vecKilobotsLightSensors[unKilobotID].ToGrayScale() << std::endl;
 
     Real fDistance = Distance(m_vecKilobotsPositions[unKilobotID], CVector2(0.0, 0.0));
     Real headindIndex = fDistance/(vArena_size/2.0);
-    const Real MAX_VAL = 1.0;
-    const Real NUM_SYMBOLS = 3.0;
-    // Real symbol1 = ((headindIndex * NUM_SYMBOLS) / MAX_VAL) + 0.5;
     Real symbol = static_cast<int>(((headindIndex * NUM_SYMBOLS) / MAX_VAL)); // Add 0.5 for rounding.
-    std::cout << "symbol1 " << symbol << std::endl;
-    tKilobotMessage.m_sType = symbol;
+    // std::cout << unKilobotID << " symbol " << symbol << std::endl;
+    // std::cout << unKilobotID << " gradient val " << headindIndex << std::endl;
+    m_vecKilobotsLightSensors[unKilobotID] = headindIndex;
+    overall_gradient += headindIndex;
 
-    if (fDistance > (vArena_size/2.0))
+    if (symbol == 0.0)
+    {
+        tKilobotMessage.m_sType = kBLACK;
+    }
+    else if (symbol == 1.0 && Real(discret_bits) > 2)
+    {
+        tKilobotMessage.m_sType = kGRAY;
+    }
+    else if (symbol == 2.0 && Real(discret_bits) > 3)
+    {
+        tKilobotMessage.m_sType = kLIGHTGRAY;
+    }
+    else
     {
         tKilobotMessage.m_sType = kWHITE;
     }
+    
 
-    // if (m_vecKilobotsLightSensors[unKilobotID] == CColor::BLACK)
-    // {
-        // tKilobotMessage.m_sType = kBLACK;
-    // }
-    // else if (m_vecKilobotsLightSensors[unKilobotID] == CColor::GRAY30)
-    // {
-    //     tKilobotMessage.m_sType = kGRAY;
-    // }
-    // else if (m_vecKilobotsLightSensors[unKilobotID] == CColor::WHITE)
+    // tKilobotMessage.m_sType = symbol;
+    // if (fDistance > (vArena_size/2.0) /*|| symbol > 2*/)
     // {
     //     tKilobotMessage.m_sType = kWHITE;
     // }
-    // else if (m_vecKilobotsLightSensors[unKilobotID] != CColor::ORANGE)
+    // else if(symbol == 2 && NUM_SYMBOLS > 3)
     // {
-    //     std::cout << "Error, wrong floor colour " << m_vecKilobotsLightSensors[unKilobotID] << "\n";
+    //     tKilobotMessage.m_sType = kLIGHTGRAY;
     // }
-
+    
+    // std::cout << unKilobotID << " sending " << tKilobotMessage.m_sType << std::endl << std::endl;
     /* check for robot collisions with walls */
     UInt8 proximity_sensor_dec = 0; // 8 bit proximity sensor as decimal
 
@@ -385,12 +395,20 @@ void GradientFollowingCALF::KiloLOG()
             kID++;
     }
     m_kiloOutput << std::endl;
-    // std::cout << std::endl;
 }
 
 /****************************************/
 /****************************************/
 
+void GradientFollowingCALF::PostExperiment()
+{
+    std::cout << "num robots: " << m_tKilobotEntities.size() << std::endl;
+    std::cout << "exp length: " << m_fTimeInSeconds << std::endl;
+    std::cout << "Overall gradient:" << (overall_gradient / m_tKilobotEntities.size()) / internal_counter << std::endl;
+}
+
+/****************************************/
+/****************************************/
 CColor GradientFollowingCALF::GetFloorColor(const CVector2 &vec_position_on_plane)
 {
     Real fPositionX(vec_position_on_plane.GetX()), fPositionY(vec_position_on_plane.GetY());

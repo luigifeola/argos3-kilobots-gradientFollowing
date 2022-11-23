@@ -5,7 +5,7 @@
     <!-- * General configuration * -->
     <!-- ************************* -->
     <framework>
-        <experiment length="6000"
+        <experiment length="3600"
         ticks_per_second="10"
         random_seed="44" />
     </framework>
