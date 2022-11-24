@@ -7,6 +7,7 @@
 #define COLLISION_BITS 8
 #define SECTORS_IN_COLLISION 2
 #define ARGOS_SIMULATION
+#define SCALING_STD 8
 
 typedef enum
 { // Enum for different motion types
@@ -32,7 +33,7 @@ motion_t current_motion_type = STOP; // Current motion type
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-float std_motion_steps = 8 * 1;       // variance of the gaussian used to compute forward motion
+float std_motion_steps = 1;       // variance of the gaussian used to compute forward motion
 float levy_exponent = 2.0;             // 2 is brownian like motion (alpha)
 float crw_exponent = 0.0;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
@@ -128,7 +129,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     {
         // get rotation toward the center (if far from center)
         // avoid colliding with the wall
-        set_color(RGB(3, 3, 3));
+        // set_color(RGB(3, 3, 3));
         proximity_sensor = sa_payload;
         wall_avoidance_start = true;
     }
@@ -246,7 +247,7 @@ void random_walk()
                 angle = fabs(wrapped_cauchy_ppf(crw_exponent));
             }
             turning_ticks = (uint32_t)((angle / M_PI) * max_turning_ticks);
-            straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
+            straight_ticks = SCALING_STD * (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
 
             if (rand_soft() % 2)
             {
@@ -301,6 +302,7 @@ void setup()
 #else
     set_motion(STOP);
 #endif
+    printf("%d Social behaviour\n", kilo_uid);
 }
 
 /*-------------------------------------------------------------------*/
@@ -351,7 +353,7 @@ void wall_avoidance_procedure(uint8_t sensor_readings)
         if (kilo_ticks > last_motion_ticks + turning_ticks)
         {
             turning_ticks = (uint32_t)((M_PI / COLLISION_BITS) * max_turning_ticks);
-            straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
+            straight_ticks = SCALING_STD * (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
         }
     }
 }
@@ -468,6 +470,7 @@ void loop()
     {
         random_walk();
     }
+    set_color(RGB(0, 3, 0));
 }
 
 int main()

@@ -39,15 +39,15 @@ base_dir=`dirname $base_config_s`
 # echo base_dir $base_dir
 echo "$CONFIGURATION_FILE" | egrep "^$SHARED_DIR" &> /dev/null || exit 1
 
-numrobots="25"
-numrobots2="0"
+numrobots="1"
+numrobots2="3"
 
 ###################################
 # experiment_length is in seconds #
 ###################################
 experiment_length="3600"
 date_time=`date "+%Y-%m-%d-%H:%M"`
-RUNS=10
+RUNS=2
 
 
 param_dir=$res_dir/"heterogeneous_"$date_time"_"$experiment_length"_seconds"

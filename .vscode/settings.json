@@ -52,7 +52,9 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "bit": "cpp",
+        "variant": "cpp"
     },
     "cmake.configureOnOpen": true,
     "cmake.sourceDirectory": "${workspaceFolder}/argos/src"

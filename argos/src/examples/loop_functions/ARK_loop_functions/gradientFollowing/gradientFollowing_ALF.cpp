@@ -118,6 +118,12 @@ void GradientFollowingCALF::SetupInitialKilobotStates()
     m_vecLastTimeMessaged.resize(m_tKilobotEntities.size());
     m_fMinTimeBetweenTwoMsg = Max<Real>(1.0, m_tKilobotEntities.size() * m_fTimeForAMessage / 3.0);
 
+    
+    if(socialRobotsSize > m_tKilobotEntities.size())
+    {
+        std::cerr << "Asked to many social robots\n";
+        exit(-1);
+    }
     /* Setup the min time between two message sent to a kilobot (ARK message sending limits)*/
     for (UInt16 it = 0; it < m_tKilobotEntities.size(); it++)
     {
@@ -133,6 +139,9 @@ void GradientFollowingCALF::SetupInitialKilobotState(CKilobotEntity &c_kilobot_e
 {
     /* Get the robot ID */
     UInt16 unKilobotID = GetKilobotId(c_kilobot_entity);
+    
+    if(unKilobotID < socialRobotsSize)
+        c_kilobot_entity.GetControllableEntity().SetController("social_behavior");
 }
 
 /****************************************/
@@ -162,6 +171,7 @@ void GradientFollowingCALF::GetExperimentVariables(TConfigurationNode &t_tree)
     GetNodeAttributeOrDefault(tExperimentVariablesNode, "dataacquisitionfrequency", m_unDataAcquisitionFrequency, m_unDataAcquisitionFrequency);
     /* Get the time for one kilobot message */
     GetNodeAttributeOrDefault(tExperimentVariablesNode, "timeforonemessage", m_fTimeForAMessage, m_fTimeForAMessage);
+    GetNodeAttributeOrDefault(tExperimentVariablesNode, "socialRobots", socialRobotsSize, socialRobotsSize);
 }
 
 /****************************************/
@@ -207,6 +217,8 @@ std::vector<int> GradientFollowingCALF::Proximity_sensor(CVector2 obstacle_direc
 void GradientFollowingCALF::UpdateKilobotState(CKilobotEntity &c_kilobot_entity)
 {
     UInt16 unKilobotID = GetKilobotId(c_kilobot_entity);
+    // std::cout << "unKilobotID: "  << unKilobotID << " controller:" << c_kilobot_entity.GetId() << std::endl;
+    // std::cout << "unKilobotID: "  << unKilobotID << std::endl;
     m_vecKilobotsPositions[unKilobotID] = GetKilobotPosition(c_kilobot_entity);
     m_vecKilobotsOrientations[unKilobotID] = GetKilobotOrientation(c_kilobot_entity);
 }
@@ -227,6 +239,7 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
     tKilobotMessage.m_sID = unKilobotID;
     tKilobotMessage.m_sData = 0;
 
+    // std::cout << "unKilobotID " << unKilobotID << " c_kilobot_entity.GetId(): " << c_kilobot_entity.GetId() << std::endl;
     // std::cout<< "Tograyscale " << m_vecKilobotsLightSensors[unKilobotID].ToGrayScale() << std::endl;
 
     Real fDistance = Distance(m_vecKilobotsPositions[unKilobotID], CVector2(0.0, 0.0));
@@ -253,17 +266,6 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
     {
         tKilobotMessage.m_sType = kWHITE;
     }
-    
-
-    // tKilobotMessage.m_sType = symbol;
-    // if (fDistance > (vArena_size/2.0) /*|| symbol > 2*/)
-    // {
-    //     tKilobotMessage.m_sType = kWHITE;
-    // }
-    // else if(symbol == 2 && NUM_SYMBOLS > 3)
-    // {
-    //     tKilobotMessage.m_sType = kLIGHTGRAY;
-    // }
     
     // std::cout << unKilobotID << " sending " << tKilobotMessage.m_sType << std::endl << std::endl;
     /* check for robot collisions with walls */
@@ -374,25 +376,21 @@ void GradientFollowingCALF::KiloLOG()
     m_kiloOutput
         << std::noshowpos << std::setw(4) << std::setprecision(0) << std::setfill('0')
         << m_fTimeInSeconds << '\t';
-    size_t kID = 0;
-    for (UInt16 it = 0; it < m_tKilobotEntities.size(); it++)
+    for (size_t kID = 0; kID < m_vecKilobotsPositions.size(); kID++)
     {
-        // argos::LOG<< kID <<std::endl;
-        // argos::LOG<< m_vecKilobotsPositions[kID].GetX() <<std::endl;
-        // argos::LOG<< m_vecKilobotsPositions[kID].GetY() <<std::endl;
         m_kiloOutput
             // << std::noshowpos
             << std::noshowpos << std::setw(2) << std::setprecision(0) << std::setfill('0')
             << kID << '\t'
+            << (kID < socialRobotsSize ? "soc" : "env") << '\t'
             << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
-            << GetKilobotPosition(*m_tKilobotEntities[it]).GetX() << '\t'
+            << m_vecKilobotsPositions[kID].GetX() << '\t'
             << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
-            << GetKilobotPosition(*m_tKilobotEntities[it]).GetY() << '\t'
+            << m_vecKilobotsPositions[kID].GetY() << '\t'
             << std::internal << std::showpos << std::setw(6) << std::setprecision(4) << std::setfill('0') << std::fixed
-            << GetKilobotOrientation(*m_tKilobotEntities[it]).GetValue() << '\t'
-            << std::noshowpos << std::setw(1) << std::setprecision(0)
-            << GetFloorColor(GetKilobotPosition(*m_tKilobotEntities[it])) << '\t';
-            kID++;
+            << m_vecKilobotsOrientations[kID].GetValue() << '\t'
+            << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
+            << m_vecKilobotsLightSensors[kID] << '\t';
     }
     m_kiloOutput << std::endl;
 }

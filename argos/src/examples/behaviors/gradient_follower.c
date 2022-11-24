@@ -7,7 +7,7 @@
 #define COLLISION_BITS 8
 #define SECTORS_IN_COLLISION 2
 #define ARGOS_SIMULATION
-#define SCALING_STD 8
+#define SCALING_STD 60
 
 typedef enum
 { // Enum for different motion types
@@ -79,24 +79,24 @@ uint8_t start = 0; // waiting from ARK a start signal to run the experiment 0 : 
 /*-------------------------------------------------------------------*/
 void set_led()
 {
-    switch (light_sensor)
-    {
-    case kBLACK:
-        set_color(RGB(3, 3, 3));
-        break;
-    case kGRAY:
-        set_color(RGB(0, 0, 3));
-        break;
-    case kLIGHTGRAY:
-        set_color(RGB(3, 0, 0));
-        break;
-    case kWHITE:
-        set_color(RGB(0, 3, 0));
-        break;
+    // switch (light_sensor)
+    // {
+    // case kBLACK:
+    //     set_color(RGB(3, 3, 3));
+    //     break;
+    // case kGRAY:
+    //     set_color(RGB(3, 0, 3));
+    //     break;
+    // case kLIGHTGRAY:
+    //     set_color(RGB(3, 3, 0));
+    //     break;
+    // case kWHITE:
+    //     set_color(RGB(0, 0, 0));
+    //     break;
 
-    default:
-        break;
-    }
+    // default:
+    //     break;
+    // }
 }
 
 /*-------------------------------------------------------------------*/
@@ -169,8 +169,8 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     switch (sa_type)
     {
     case kBLACK:
-        levy_exponent = 1.95;
-        crw_exponent = 0.04;
+        levy_exponent = 2.0;
+        crw_exponent = 0.0;
         // printf("Black\n");
         break;
     case kGRAY:
@@ -189,7 +189,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
         break;
     case kWHITE:
         levy_exponent = 1.0;
-        crw_exponent = 0.95;
+        crw_exponent = 0.99;
         // printf("White\n");
         break;
 
@@ -201,6 +201,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     {
         // get rotation toward the center (if far from center)
         // avoid colliding with the wall
+        // set_color(RGB(0, 0, 3));
         proximity_sensor = sa_payload;
         wall_avoidance_start = true;
     }
@@ -356,6 +357,7 @@ void setup()
 #else
     set_motion(STOP);
 #endif
+    printf("%d Environmental behaviour\n", kilo_uid);
 }
 
 /*-------------------------------------------------------------------*/
@@ -436,6 +438,7 @@ void loop()
     {
         random_walk();
     }
+    set_color(RGB(0, 0, 3));
 }
 
 int main()

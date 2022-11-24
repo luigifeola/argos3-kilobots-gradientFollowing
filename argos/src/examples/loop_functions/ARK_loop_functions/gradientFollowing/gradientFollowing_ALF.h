@@ -131,8 +131,13 @@ private:
     /* random number generator */
     CRandom::CRNG *c_rng;
     UInt32 random_seed;
+
+    /* Send a right amount of messages for each time-step*/
     std::vector<Real> m_vecLastTimeMessaged;
     Real m_fMinTimeBetweenTwoMsg;
+
+    /******/
+    UInt16 socialRobotsSize = 0;
 
     /* output LOG files */
     std::ofstream m_kiloOutput;
@@ -148,7 +153,7 @@ private:
     /** Gradient field radius */
     Real m_fGradientFieldRadius;
 
-    /** output file for data acquizition */
+    /** output file for data acquisition */
     std::ofstream m_cOutput;
 
     /** output file name*/
