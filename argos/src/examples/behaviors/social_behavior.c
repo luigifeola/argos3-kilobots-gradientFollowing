@@ -411,10 +411,10 @@ void sampling_neighbors2()
   }
   int threshold1 = 4;
   int threshold2 = 1;
-  double alpha1 = 1.45;
-  double alpha2 = 1.95;
-  double rho1 = 0.95;
-  double rho2 = 0.04;
+  double alpha1 = 1.13;
+  double alpha2 = 1.93;
+  double rho1 = 0.99;
+  double rho2 = 0.02;
   if(state == 0)
   {
     levy_exponent = alpha1;
@@ -430,7 +430,7 @@ void sampling_neighbors2()
     levy_exponent = alpha2;
     crw_exponent = rho2;
     set_color(RGB(0, 0, 3));
-    if(neighbors_count <= threshold2)
+    if(neighbors_count < threshold2)
     {
       state = 0;
     }
@@ -455,7 +455,7 @@ void loop()
 #endif
     if(neighbors_sampling_timer <= kilo_ticks)
     {
-      sampling_neighbors();
+      sampling_neighbors2();
     }
 
     if (wall_avoidance_start)
