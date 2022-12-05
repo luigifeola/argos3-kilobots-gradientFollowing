@@ -7,7 +7,7 @@
     <framework>
         <experiment length="3600"
         ticks_per_second="10"
-        random_seed="3" />
+        random_seed="51" />
     </framework>
 
     <!-- *************** -->
@@ -47,7 +47,7 @@
 
 
         <variables
-            kilo_filename="seed#3_kiloLOG.tsv"
+            kilo_filename="seed#51_kiloLOG.tsv"
             dataacquisitionfrequency="10"
             environmentplotupdatefrequency="10">
         </variables>

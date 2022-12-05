@@ -368,14 +368,14 @@ void sampling_neighbors()
     broadcasting_robots[i].id = 0;
   }
 
-  int threshold1 = 3;
-  int threshold2 = 4;
-  double alpha1 = 1.27;
-  double alpha2 = 1.78;
-  double alpha3 = 1.94;
-  double rho1 = 0.97;
-  double rho2 = 0.55;
-  double rho3 = 0.18;
+  int threshold1 = 2;
+  int threshold2 = 10;
+  double alpha1 = 1.01;
+  double alpha2 = 1.98;
+  double alpha3 = 1.18;
+  double rho1 = 0.03;
+  double rho2 = 0.07;
+  double rho3 = 0.95;
   if(neighbors_count < threshold1)
   {
     levy_exponent = alpha1;
