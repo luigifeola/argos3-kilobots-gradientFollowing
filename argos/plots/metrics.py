@@ -14,7 +14,7 @@ for seed in range(30):
     # if seed == 17:
     #     continue
     print("Dataframe " + str(seed))
-    data = pd.read_csv ("../results/social_behavior/irace_behavior2_10e5_budget_config_7/seed#" + str(seed+1) + "_kiloLOG.tsv", sep = '\t')
+    data = pd.read_csv ("../results/social_behavior/irace_behavior1_10e5_budget_config_7_test_turning/seed#" + str(seed+1) + "_kiloLOG.tsv", sep = '\t')
     columnsToDrop = []
     for i in range(25):
         columnsToDrop.append(4+i*4+i)

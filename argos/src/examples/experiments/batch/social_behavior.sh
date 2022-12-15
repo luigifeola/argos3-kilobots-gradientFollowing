@@ -44,13 +44,13 @@ numrobots="25"
 ###################################
 # experiment_length is in seconds #
 ###################################
-experiment_length="3600"
+experiment_length="2500"
 date_time=`date "+%Y-%m-%d-%H:%M"`
 RUNS=30
 
 
-param_dir=$res_dir/"social_behavior_"$date_time"_"$experiment_length"_seconds"
-# param_dir=$res_dir/"irace_behavior1_10e5_budget_config_10"
+# param_dir=$res_dir/"social_behavior_"$date_time"_"$experiment_length"_seconds"
+param_dir=$res_dir/"irace_behavior1_10e5_budget_config_1_test_turning"
 
 if [[ ! -e $param_dir ]]; then
     cmake -E make_directory $param_dir

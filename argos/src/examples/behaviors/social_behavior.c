@@ -29,6 +29,7 @@ typedef enum
 } Free_space;
 
 motion_t current_motion_type = STOP; // Current motion type
+motion_t pivot = STOP;               // select the pivot, if always left or always right
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
@@ -55,6 +56,8 @@ bool wall_avoidance_start = false;
 // Variables for Smart Arena messages
 int sa_type = 0;
 int sa_payload = 0;
+
+uint32_t turning_ticks_threshold = (uint32_t)((0.18 / M_PI) * max_turning_ticks);    //threshold of 0.2 degrees
 
 #ifndef ARGOS_SIMULATION
 uint8_t start = 0; // waiting from ARK a start signal to run the experiment 0 : not received, 1 : received, 2 : not need anymore to receive
@@ -245,18 +248,23 @@ void random_walk()
             {
                 angle = fabs(wrapped_cauchy_ppf(crw_exponent));
             }
+            // printf("Angle radians : %f\n", angle);
             turning_ticks = (uint32_t)((angle / M_PI) * max_turning_ticks);
             straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
+            // printf("turning_ticks : %i\n", turning_ticks);
 
+            if(turning_ticks < turning_ticks_threshold)
+            {
+                break;
+            }
+
+            /* 1st strategy */
             if (rand_soft() % 2)
             {
-                set_motion(TURN_LEFT);
+                turning_ticks = max_turning_ticks * 2 - turning_ticks;
             }
-            else
-            {
-                max_turning_ticks * 2 - turning_ticks;
-                set_motion(TURN_LEFT);
-            }
+
+            set_motion(pivot);
         }
         break;
 
@@ -295,6 +303,15 @@ void setup()
     rand_seed(seed);
     seed = rand_hard();
     srand(seed);
+
+    if (rand_soft() % 2)
+    {
+        pivot = TURN_LEFT;
+    }
+    else
+    {
+        pivot = TURN_RIGHT;
+    }
 
 #ifdef ARGOS_SIMULATION
     set_motion(FORWARD);
