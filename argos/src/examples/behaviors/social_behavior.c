@@ -7,7 +7,6 @@
 #define COLLISION_BITS 8
 #define SECTORS_IN_COLLISION 2
 #define ARGOS_SIMULATION
-#define SCALING_STD 8
 
 typedef enum
 { // Enum for different motion types
@@ -30,10 +29,11 @@ typedef enum
 } Free_space;
 
 motion_t current_motion_type = STOP; // Current motion type
+motion_t pivot = STOP;               // select the pivot, if always left or always right
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-float std_motion_steps = 1;       // variance of the gaussian used to compute forward motion
+float std_motion_steps = 8 * 1;       // variance of the gaussian used to compute forward motion
 float levy_exponent = 2.0;             // 2 is brownian like motion (alpha)
 float crw_exponent = 0.0;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
@@ -56,6 +56,8 @@ bool wall_avoidance_start = false;
 // Variables for Smart Arena messages
 int sa_type = 0;
 int sa_payload = 0;
+
+uint32_t turning_ticks_threshold = (uint32_t)((0.18 / M_PI) * max_turning_ticks);    //threshold of 0.2 degrees
 
 #ifndef ARGOS_SIMULATION
 uint8_t start = 0; // waiting from ARK a start signal to run the experiment 0 : not received, 1 : received, 2 : not need anymore to receive
@@ -129,7 +131,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     {
         // get rotation toward the center (if far from center)
         // avoid colliding with the wall
-        // set_color(RGB(3, 3, 3));
+        set_color(RGB(3, 3, 3));
         proximity_sensor = sa_payload;
         wall_avoidance_start = true;
     }
@@ -246,18 +248,23 @@ void random_walk()
             {
                 angle = fabs(wrapped_cauchy_ppf(crw_exponent));
             }
+            // printf("Angle radians : %f\n", angle);
             turning_ticks = (uint32_t)((angle / M_PI) * max_turning_ticks);
-            straight_ticks = SCALING_STD * (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
+            straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
+            // printf("turning_ticks : %i\n", turning_ticks);
 
+            if(turning_ticks < turning_ticks_threshold)
+            {
+                break;
+            }
+
+            /* 1st strategy */
             if (rand_soft() % 2)
             {
-                set_motion(TURN_LEFT);
+                turning_ticks = max_turning_ticks * 2 - turning_ticks;
             }
-            else
-            {
-                max_turning_ticks * 2 - turning_ticks;
-                set_motion(TURN_LEFT);
-            }
+
+            set_motion(pivot);
         }
         break;
 
@@ -297,12 +304,20 @@ void setup()
     seed = rand_hard();
     srand(seed);
 
+    if (rand_soft() % 2)
+    {
+        pivot = TURN_LEFT;
+    }
+    else
+    {
+        pivot = TURN_RIGHT;
+    }
+
 #ifdef ARGOS_SIMULATION
     set_motion(FORWARD);
 #else
     set_motion(STOP);
 #endif
-    printf("%d Social behaviour\n", kilo_uid);
 }
 
 /*-------------------------------------------------------------------*/
@@ -353,7 +368,7 @@ void wall_avoidance_procedure(uint8_t sensor_readings)
         if (kilo_ticks > last_motion_ticks + turning_ticks)
         {
             turning_ticks = (uint32_t)((M_PI / COLLISION_BITS) * max_turning_ticks);
-            straight_ticks = SCALING_STD * (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
+            straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
         }
     }
 }
@@ -370,14 +385,14 @@ void sampling_neighbors()
     broadcasting_robots[i].id = 0;
   }
 
-  int threshold1 = 3;
-  int threshold2 = 4;
-  double alpha1 = 1.27;
-  double alpha2 = 1.78;
-  double alpha3 = 1.94;
-  double rho1 = 0.97;
-  double rho2 = 0.55;
-  double rho3 = 0.18;
+  int threshold1 = 2;
+  int threshold2 = 10;
+  double alpha1 = 1.01;
+  double alpha2 = 1.98;
+  double alpha3 = 1.18;
+  double rho1 = 0.03;
+  double rho2 = 0.07;
+  double rho3 = 0.95;
   if(neighbors_count < threshold1)
   {
     levy_exponent = alpha1;
@@ -413,10 +428,10 @@ void sampling_neighbors2()
   }
   int threshold1 = 4;
   int threshold2 = 1;
-  double alpha1 = 1.45;
-  double alpha2 = 1.95;
-  double rho1 = 0.95;
-  double rho2 = 0.04;
+  double alpha1 = 1.13;
+  double alpha2 = 1.93;
+  double rho1 = 0.99;
+  double rho2 = 0.02;
   if(state == 0)
   {
     levy_exponent = alpha1;
@@ -432,7 +447,7 @@ void sampling_neighbors2()
     levy_exponent = alpha2;
     crw_exponent = rho2;
     set_color(RGB(0, 0, 3));
-    if(neighbors_count <= threshold2)
+    if(neighbors_count < threshold2)
     {
       state = 0;
     }
@@ -457,7 +472,7 @@ void loop()
 #endif
     if(neighbors_sampling_timer <= kilo_ticks)
     {
-      sampling_neighbors();
+      sampling_neighbors2();
     }
 
     if (wall_avoidance_start)
@@ -470,7 +485,6 @@ void loop()
     {
         random_walk();
     }
-    set_color(RGB(0, 3, 0));
 }
 
 int main()
