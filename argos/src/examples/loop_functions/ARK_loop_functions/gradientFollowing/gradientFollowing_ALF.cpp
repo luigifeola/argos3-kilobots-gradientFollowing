@@ -19,6 +19,8 @@ namespace
     double vArena_size = 1.0;
     double vDistance_threshold = vArena_size / 2.0 - 2.0 * kKiloDiameter;
 
+    const UInt32 MAX_PLACE_TRIALS = 100;
+
     // wall avoidance params
     const CVector2 up_direction(0.0, -1.0);
     const CVector2 down_direction(0.0, 1.0);
@@ -44,7 +46,7 @@ namespace
     } Discretization;
 
     Background background_flag = DISCRETE;
-    Discretization discret_bits = BITS_4;
+    Discretization discret_bits = BITS_3;
 
     const Real MAX_VAL = 1.0;
     const Real NUM_SYMBOLS = Real(discret_bits);
@@ -64,7 +66,7 @@ GradientFollowingCALF::GradientFollowingCALF() : m_unDataAcquisitionFrequency(10
 
 void GradientFollowingCALF::Init(TConfigurationNode &t_node)
 {
-
+    std::cout<< "Init\n";
 
     /* Initialize ALF*/
     CALF::Init(t_node);
@@ -72,6 +74,9 @@ void GradientFollowingCALF::Init(TConfigurationNode &t_node)
 
     /*********** LOG FILES *********/
     m_kiloOutput.open(m_strKiloOutputFileName, std::ios_base::trunc | std::ios_base::out);
+
+
+    
 }
 
 /****************************************/
@@ -111,6 +116,7 @@ void GradientFollowingCALF::PostStep()
 
 void GradientFollowingCALF::SetupInitialKilobotStates()
 {
+    std::cout<< "SetupInitialKilobotStates\n";
     /* Resize variables related to the number of Kilobots */
     m_vecKilobotsPositions.resize(m_tKilobotEntities.size());
     m_vecKilobotsLightSensors.resize(m_tKilobotEntities.size());
@@ -118,18 +124,21 @@ void GradientFollowingCALF::SetupInitialKilobotStates()
     m_vecLastTimeMessaged.resize(m_tKilobotEntities.size());
     m_fMinTimeBetweenTwoMsg = Max<Real>(1.0, m_tKilobotEntities.size() * m_fTimeForAMessage / 3.0);
 
-    
-    if(socialRobotsSize > m_tKilobotEntities.size())
+    if(socialRobots > m_tKilobotEntities.size())
     {
         std::cerr << "Asked to many social robots\n";
         exit(-1);
     }
+
     /* Setup the min time between two message sent to a kilobot (ARK message sending limits)*/
     for (UInt16 it = 0; it < m_tKilobotEntities.size(); it++)
     {
         /* Setup the virtual states of a kilobot*/
         SetupInitialKilobotState(*m_tKilobotEntities[it]);
     }
+
+    CVector3 arena_size = GetSpace().GetArenaSize();
+    PlaceBots(arena_size, cornerRadius);
 }
 
 /****************************************/
@@ -140,19 +149,112 @@ void GradientFollowingCALF::SetupInitialKilobotState(CKilobotEntity &c_kilobot_e
     /* Get the robot ID */
     UInt16 unKilobotID = GetKilobotId(c_kilobot_entity);
     
-    if(unKilobotID < socialRobotsSize)
+    
+    if(unKilobotID < socialRobots)
         c_kilobot_entity.GetControllableEntity().SetController("social_behavior");
 }
 
 /****************************************/
 /****************************************/
 
+
 void GradientFollowingCALF::SetupVirtualEnvironments(TConfigurationNode &t_tree)
 {
+    std::cout<< "SetupVirtualEnvironments\n";
     /* Read arena parameters */
     vArena_size = argos::CSimulator::GetInstance().GetSpace().GetArenaSize().GetX();
     vDistance_threshold = vArena_size / 2.0 - 2.0 * kKiloDiameter;
     std::cout << "Arena size: " << vArena_size << "\tWA threshold: " << vDistance_threshold << "\n";
+
+    /* Get the experiment variables node from the .argos file */
+    TConfigurationNode &tExperimentVariablesNode = GetNode(t_tree, "variables");
+
+    double cornerProportion;
+    GetNodeAttributeOrDefault(tExperimentVariablesNode, "cornerProportion", cornerProportion, 0.1);
+    GetNodeAttributeOrDefault(tExperimentVariablesNode, "socialRobots", socialRobots, socialRobots);
+    // std::cout << std::endl << "cornerProportion: " << cornerProportion << std::endl << std::endl;
+    // std::cout << std::endl << "socialRobots: " << socialRobots << std::endl << std::endl;
+
+    /**
+     * 
+     *  CREATION AND POSITIONING OF THE ARENA WALLS
+     *  
+     * */
+    CVector3 arena_size = GetSpace().GetArenaSize();
+
+    unsigned int cornerWalls = 20;
+    cornerRadius = cornerProportion * Min(arena_size[0],arena_size[1]);
+
+    CQuaternion wall_orientation;
+    wall_orientation.FromEulerAngles(CRadians::ZERO, CRadians::ZERO, CRadians::ZERO );
+    CBoxEntity* box = new CBoxEntity("west_wall", CVector3(0,-arena_size[1]/2,0), wall_orientation, false, CVector3(arena_size[0]-2*cornerRadius,0.01,0.01), (Real)1.0 );
+    AddEntity( *box );
+    box = new CBoxEntity("east_wall", CVector3(0,arena_size[1]/2,0), wall_orientation, false, CVector3(arena_size[0]-2*cornerRadius,0.01,0.01), (Real)1.0 );
+    AddEntity( *box );
+    box = new CBoxEntity("south_wall", CVector3(-arena_size[0]/2,0,0), wall_orientation, false, CVector3(0.01,arena_size[1]-2*cornerRadius,0.01), (Real)1.0 );
+    AddEntity( *box );
+    box = new CBoxEntity("north_wall", CVector3(arena_size[0]/2,0,0), wall_orientation, false, CVector3(0.01,arena_size[1]-2*cornerRadius,0.01), (Real)1.0 );
+    AddEntity( *box );
+
+    PlaceQuarterCircleWall(CVector3(arena_size[0]/2-cornerRadius,arena_size[1]/2-cornerRadius,0),cornerRadius,cornerWalls,0);
+    PlaceQuarterCircleWall(CVector3(-arena_size[0]/2+cornerRadius,arena_size[1]/2-cornerRadius,0),cornerRadius,cornerWalls,1);
+    PlaceQuarterCircleWall(CVector3(-arena_size[0]/2+cornerRadius,-arena_size[1]/2+cornerRadius,0),cornerRadius,cornerWalls,2);
+    PlaceQuarterCircleWall(CVector3(arena_size[0]/2-cornerRadius,-arena_size[1]/2+cornerRadius,0),cornerRadius,cornerWalls,3);
+}
+
+/****************************************/
+/****************************************/
+
+void GradientFollowingCALF::PlaceQuarterCircleWall(CVector3 pos, double radius, unsigned int nbWalls, unsigned int quadrant) {
+    CRadians wall_angle = CRadians::TWO_PI/(4*nbWalls);CVector3 wall_size(0.01, 2.0*radius*Tan(CRadians::PI/(4*nbWalls)), 0.01);
+    std::ostringstream entity_id;
+    for( UInt32 i = quadrant*nbWalls; i <= quadrant*nbWalls + nbWalls; i++ ) {
+        entity_id.str("");entity_id << "wall_" <<quadrant<< i;
+        CRadians wall_rotation = wall_angle*i;
+        
+        CVector3 wall_position(pos[0] + radius*Cos(wall_rotation), pos[1] + radius*Sin(wall_rotation), 0 );
+        CQuaternion wall_orientation;
+        wall_orientation.FromEulerAngles( wall_rotation, CRadians::ZERO, CRadians::ZERO );
+        
+        CBoxEntity* box = new CBoxEntity(entity_id.str(), wall_position, wall_orientation, false, wall_size, (Real)1.0 );
+        AddEntity( *box );
+    }
+}
+
+/****************************************/
+/****************************************/
+
+void GradientFollowingCALF::PlaceBots(CVector3 arenaSize, double cornerRadius) {
+    CVector3 cPosition;
+    CQuaternion cOrientation;
+    cPosition.SetZ(0.0);
+    CRandom::CRNG* m_pcRNG = CRandom::CreateRNG("argos");
+    unsigned int unTrials;
+    CKilobotEntity* pcKB;
+    for(unsigned int i=0; i<m_tKilobotEntities.size(); ++i) {
+        bool bDone = false;
+        unTrials = 0;
+        
+        pcKB = m_tKilobotEntities[i];
+        do {
+            double x = m_pcRNG->Uniform(CRange<Real>(-1.0 * vDistance_threshold, vDistance_threshold));
+            double y = m_pcRNG->Uniform(CRange<Real>(-1.0 * vDistance_threshold, vDistance_threshold));
+            if(abs(x)<arenaSize[0]/2.0-cornerRadius or abs(y)<arenaSize[1]/2.0-cornerRadius or Distance(CVector3(abs(x),abs(y),0),CVector3(arenaSize[0]/2.0-cornerRadius,arenaSize[1]/2.0-cornerRadius,0))<cornerRadius) {
+                cPosition.SetX(x);
+                cPosition.SetY(y);
+
+                CRadians cRandomOrientation = CRadians(m_pcRNG->Uniform(CRange<Real>(-CRadians::PI.GetValue(), CRadians::PI.GetValue())));
+                cOrientation.FromEulerAngles(cRandomOrientation, CRadians::ZERO, CRadians::ZERO);
+
+                bDone = MoveEntity(pcKB->GetEmbodiedEntity(), cPosition, cOrientation);
+            }
+            ++unTrials;
+        } while(!bDone && unTrials <= MAX_PLACE_TRIALS);
+        if(!bDone) {
+            THROW_ARGOSEXCEPTION("Can't place " << "kb_" + ToString(i));
+        }
+    }
+    
 }
 
 /****************************************/
@@ -160,18 +262,18 @@ void GradientFollowingCALF::SetupVirtualEnvironments(TConfigurationNode &t_tree)
 
 void GradientFollowingCALF::GetExperimentVariables(TConfigurationNode &t_tree)
 {
+    std::cout<< "GetExperimentVariables\n";
     /* Get the experiment variables node from the .argos file */
     TConfigurationNode &tExperimentVariablesNode = GetNode(t_tree, "variables");
 
     // /* Get the output datafile name and open it */
     GetNodeAttribute(tExperimentVariablesNode, "kilo_filename", m_strKiloOutputFileName);
-    std::cout<< "Filename: " << m_strKiloOutputFileName << std::endl;
+    // std::cout<< "Filename: " << m_strKiloOutputFileName << std::endl;
 
     /* Get the frequency of data saving */
     GetNodeAttributeOrDefault(tExperimentVariablesNode, "dataacquisitionfrequency", m_unDataAcquisitionFrequency, m_unDataAcquisitionFrequency);
     /* Get the time for one kilobot message */
     GetNodeAttributeOrDefault(tExperimentVariablesNode, "timeforonemessage", m_fTimeForAMessage, m_fTimeForAMessage);
-    GetNodeAttributeOrDefault(tExperimentVariablesNode, "socialRobots", socialRobotsSize, socialRobotsSize);
 }
 
 /****************************************/
@@ -217,7 +319,8 @@ std::vector<int> GradientFollowingCALF::Proximity_sensor(CVector2 obstacle_direc
 void GradientFollowingCALF::UpdateKilobotState(CKilobotEntity &c_kilobot_entity)
 {
     UInt16 unKilobotID = GetKilobotId(c_kilobot_entity);
-    // std::cout << "unKilobotID: "  << unKilobotID << " controller:" << c_kilobot_entity.GetId() << std::endl;
+    // std::cout << "unKilobotID: "  << unKilobotID << " controller:" 
+    //           << (unKilobotID < socialRobots ? "soc" : "env") << std::endl;
     // std::cout << "unKilobotID: "  << unKilobotID << std::endl;
     m_vecKilobotsPositions[unKilobotID] = GetKilobotPosition(c_kilobot_entity);
     m_vecKilobotsOrientations[unKilobotID] = GetKilobotOrientation(c_kilobot_entity);
@@ -382,7 +485,7 @@ void GradientFollowingCALF::KiloLOG()
             // << std::noshowpos
             << std::noshowpos << std::setw(2) << std::setprecision(0) << std::setfill('0')
             << kID << '\t'
-            << (kID < socialRobotsSize ? "soc" : "env") << '\t'
+            << (kID < socialRobots ? "soc" : "env") << '\t'
             << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
             << m_vecKilobotsPositions[kID].GetX() << '\t'
             << std::internal << std::showpos << std::setw(8) << std::setprecision(4) << std::setfill('0') << std::fixed
@@ -401,6 +504,7 @@ void GradientFollowingCALF::KiloLOG()
 void GradientFollowingCALF::PostExperiment()
 {
     std::cout << "num robots: " << m_tKilobotEntities.size() << std::endl;
+    std::cout << "num social robots: " << socialRobots << std::endl;
     std::cout << "exp length: " << m_fTimeInSeconds << std::endl;
     std::cout << "Overall gradient:" << (overall_gradient / m_tKilobotEntities.size()) / internal_counter << std::endl;
 }
@@ -482,26 +586,26 @@ CColor GradientFollowingCALF::GetFloorColor(const CVector2 &vec_position_on_plan
 
 
     /****************************Boarder for wall avoidance*************************************************************************************************/
-    // // Top border for wall avoidance
-    // if (vec_position_on_plane.GetY() < vDistance_threshold + 0.005 && vec_position_on_plane.GetY() > vDistance_threshold - 0.005)
-    // {
-    //     cColor = CColor::ORANGE;
-    // }
-    // // Bottom border for wall avoidance
-    // if (vec_position_on_plane.GetY() < -1.0 * (vDistance_threshold - 0.005) && vec_position_on_plane.GetY() > -1 * (vDistance_threshold + 0.005))
-    // {
-    //     cColor = CColor::ORANGE;
-    // }
-    // // Right border for wall avoidance
-    // if (vec_position_on_plane.GetX() < vDistance_threshold + 0.005 && vec_position_on_plane.GetX() > vDistance_threshold - 0.005)
-    // {
-    //     cColor = CColor::ORANGE;
-    // }
-    // // Left border for wall avoidance
-    // if (vec_position_on_plane.GetX() < -1.0 * (vDistance_threshold - 0.005) && vec_position_on_plane.GetX() > -1 * (vDistance_threshold + 0.005))
-    // {
-    //     cColor = CColor::ORANGE;
-    // }
+    // Top border for wall avoidance
+    if (vec_position_on_plane.GetY() < vDistance_threshold + 0.005 && vec_position_on_plane.GetY() > vDistance_threshold - 0.005)
+    {
+        cColor = CColor::ORANGE;
+    }
+    // Bottom border for wall avoidance
+    if (vec_position_on_plane.GetY() < -1.0 * (vDistance_threshold - 0.005) && vec_position_on_plane.GetY() > -1 * (vDistance_threshold + 0.005))
+    {
+        cColor = CColor::ORANGE;
+    }
+    // Right border for wall avoidance
+    if (vec_position_on_plane.GetX() < vDistance_threshold + 0.005 && vec_position_on_plane.GetX() > vDistance_threshold - 0.005)
+    {
+        cColor = CColor::ORANGE;
+    }
+    // Left border for wall avoidance
+    if (vec_position_on_plane.GetX() < -1.0 * (vDistance_threshold - 0.005) && vec_position_on_plane.GetX() > -1 * (vDistance_threshold + 0.005))
+    {
+        cColor = CColor::ORANGE;
+    }
 
     /****************************Communication range*************************************************************************************************/
     // for(auto kID : m_vecKilobotsPositions)

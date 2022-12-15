@@ -49,6 +49,7 @@ typedef enum
 #include <argos3/core/simulator/entity/composable_entity.h>
 #include <argos3/plugins/simulator/entities/led_equipped_entity.h>
 #include <argos3/core/simulator/entity/floor_entity.h>
+#include <argos3/plugins/simulator/entities/box_entity.h>
 
 #include <argos3/plugins/robots/kilobot/simulator/kilobot_communication_entity.h>
 #include <argos3/plugins/robots/kilobot/simulator/kilobot_communication_medium.h>
@@ -72,6 +73,10 @@ public:
     virtual ~GradientFollowingCALF() {}
 
     virtual void Init(TConfigurationNode &t_tree);
+
+    virtual void PlaceQuarterCircleWall(CVector3 pos, double radius, unsigned int walls, unsigned int quadrant);
+
+    virtual void PlaceBots(CVector3 arenaSize, double cornerRadius);
 
     virtual void Reset();
 
@@ -136,14 +141,12 @@ private:
     std::vector<Real> m_vecLastTimeMessaged;
     Real m_fMinTimeBetweenTwoMsg;
 
-    /******/
-    UInt16 socialRobotsSize = 0;
-
     /* output LOG files */
     std::ofstream m_kiloOutput;
     std::string m_strKiloOutputFileName;
 
-
+    /** Size of social robots */
+    unsigned int socialRobots;
 
     /* Kilobots properties */
     std::vector<CVector2> m_vecKilobotsPositions;
@@ -153,6 +156,9 @@ private:
     /** Gradient field radius */
     Real m_fGradientFieldRadius;
 
+    /** Circular corner radius  */
+    double cornerRadius;
+
     /** output file for data acquisition */
     std::ofstream m_cOutput;
 
@@ -161,6 +167,7 @@ private:
 
     /** data acquisition frequency in ticks */
     UInt16 m_unDataAcquisitionFrequency;
+
 };
 
 #endif

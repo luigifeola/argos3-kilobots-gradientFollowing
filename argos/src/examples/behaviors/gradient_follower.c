@@ -7,7 +7,7 @@
 #define COLLISION_BITS 8
 #define SECTORS_IN_COLLISION 2
 #define ARGOS_SIMULATION
-#define SCALING_STD 60
+#define SCALING_STD 8
 
 typedef enum
 { // Enum for different motion types
@@ -42,7 +42,7 @@ motion_t pivot = STOP;               // select the pivot, if always left or alwa
 
 /***********WALK PARAMETERS***********/
 // const float std_motion_steps = 5 * 16; // variance of the gaussian used to compute forward motion
-float std_motion_steps = 2;       // variance of the gaussian used to compute forward motion
+float std_motion_steps = 8 * 1;       // variance of the gaussian used to compute forward motion
 float levy_exponent = 2.0;             // 2 is brownian like motion (alpha)
 float crw_exponent = 0.0;              // higher more straight (rho)
 uint32_t turning_ticks = 0;            // keep count of ticks of turning
@@ -70,6 +70,8 @@ int sa_payload = 0;
 
 Light_sensor light_sensor = kWHITE;
 
+uint32_t turning_ticks_threshold = (uint32_t)((0.18 / M_PI) * max_turning_ticks);    //threshold of 0.2 degrees
+
 #ifndef ARGOS_SIMULATION
 uint8_t start = 0; // waiting from ARK a start signal to run the experiment 0 : not received, 1 : received, 2 : not need anymore to receive
 #endif
@@ -79,24 +81,24 @@ uint8_t start = 0; // waiting from ARK a start signal to run the experiment 0 : 
 /*-------------------------------------------------------------------*/
 void set_led()
 {
-    // switch (light_sensor)
-    // {
-    // case kBLACK:
-    //     set_color(RGB(3, 3, 3));
-    //     break;
-    // case kGRAY:
-    //     set_color(RGB(3, 0, 3));
-    //     break;
-    // case kLIGHTGRAY:
-    //     set_color(RGB(3, 3, 0));
-    //     break;
-    // case kWHITE:
-    //     set_color(RGB(0, 0, 0));
-    //     break;
+    switch (light_sensor)
+    {
+    case kBLACK:
+        set_color(RGB(3, 3, 3));
+        break;
+    case kGRAY:
+        set_color(RGB(3, 0, 3));
+        break;
+    case kLIGHTGRAY:
+        set_color(RGB(3, 3, 0));
+        break;
+    case kWHITE:
+        set_color(RGB(0, 0, 0));
+        break;
 
-    // default:
-    //     break;
-    // }
+    default:
+        break;
+    }
 }
 
 /*-------------------------------------------------------------------*/
@@ -109,14 +111,17 @@ void set_motion(motion_t new_motion_type)
         switch (new_motion_type)
         {
         case FORWARD:
+            // printf("Forward\n");
             spinup_motors();
             set_motors(kilo_straight_left, kilo_straight_right);
             break;
         case TURN_RIGHT:
+            // printf("Right\n");
             spinup_motors();
             set_motors(0, kilo_turn_right);
             break;
         case TURN_LEFT:
+            // printf("Left\n");
             spinup_motors();
             set_motors(kilo_turn_left, 0);
             break;
@@ -146,51 +151,47 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     // printf("sa_payload: %d\n", sa_payload);
     /*
     2 Bits
-    --std 1 --a0 1.98 --r0 0.01 --a1 1.01 --r1 0.97
-
-    --std 1 --a0 1.94 --r0 0.03 --a1 1.01 --r1 0.98
-
-    --std 1 --a0 1.97 --r0 0.02 --a1 1 --r1 0.98
+        std alpha0 rho0 alpha1 rho1
+         1   1.99 0.00   1.01 0.98
 
     3 Bits
-    --std 2 --a0 1.95 --r0 0.04 --a1 1.99 --r1 0.02 --a2 1 --r2 0.95
-
-    --std 2 --a0 1.94 --r0 0.04 --a1 1.99 --r1 0.02 --a2 1 --r2 0.94
-
-    --std 2 --a0 1.94 --r0 0.02 --a1 1.99 --r1 0 --a2 1.03 --r2 0.93
+        std alpha0 rho0 alpha1 rho1 alpha2 rho2
+         1   1.96 0.29   1.95 0.02      1 0.96
 
     4 Bits
-    --std 1 --a0 1.95 --r0 0.44 --a1 1.99 --r1 0.0 --a2 1.02 --r2 0.25 --a3 1.0 --r3 0.96
-
-    --std 2 --a0 1.99 --r0 0.0 --a1 1.99 --r1 0.0 --a2 1.13 --r2 0.01 --a3 1.02 --r3 0.95
-
-    --std 1 --a0 1.98 --r0 0.76 --a1 1.99 --r1 0.0 --a2 1.01 --r2 0.59 --a3 1.01 --r3 0.97
+         std alpha0 rho0 alpha1 rho1 alpha2 rho2 alpha3 rho3
+           1   1.99 0.31   1.95 0.00   1.02 0.05   1.01 0.96
+    
     */
     switch (sa_type)
     {
     case kBLACK:
-        levy_exponent = 2.0;
-        crw_exponent = 0.0;
+        levy_exponent = 1.96;
+        crw_exponent = 0.29;
         // printf("Black\n");
+        // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kGRAY:
-        levy_exponent = 1.99;
-        crw_exponent = 0.02;
+        levy_exponent = 1.95;
+        crw_exponent = 0.00;
         // printf("Gray\n");
         // printf("Error to many bits!!!!!\n");
         // printf("Error to many bits!!!!!\n");
+        // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kLIGHTGRAY:
-        levy_exponent = 1.13;
-        crw_exponent = 0.01;
-        // printf("LightGray\n");
+        levy_exponent = 1.95;
+        crw_exponent = 0.00;
+        printf("LightGray\n");
         // printf("Error to many bits!!!!!\n");
         // printf("Error to many bits!!!!!\n");
+        // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kWHITE:
         levy_exponent = 1.0;
-        crw_exponent = 0.99;
+        crw_exponent = 0.96;
         // printf("White\n");
+        // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
 
     default:
@@ -300,15 +301,23 @@ void random_walk()
             {
                 angle = fabs(wrapped_cauchy_ppf(crw_exponent));
             }
+            straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
             turning_ticks = (uint32_t)((angle / M_PI) * max_turning_ticks);
-            straight_ticks = SCALING_STD * (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
 
+            if(turning_ticks < turning_ticks_threshold) 
+            {
+                break;
+            }
+            
+            /* 1st strategy */
             if (rand_soft() % 2)
             {
                 turning_ticks = max_turning_ticks * 2 - turning_ticks;
             }
+
+            set_motion(pivot);            
             
-            set_motion(pivot);
+            // printf("Straight ticks %d,  angle:%f,  turning ticks:%d\n", straight_ticks, angle * (180.0/M_PI), turning_ticks);
             
         }
         break;
@@ -357,7 +366,7 @@ void setup()
 #else
     set_motion(STOP);
 #endif
-    printf("%d Environmental behaviour\n", kilo_uid);
+    // printf("%d Environmental behaviour\n", kilo_uid);
 }
 
 /*-------------------------------------------------------------------*/
@@ -438,7 +447,7 @@ void loop()
     {
         random_walk();
     }
-    set_color(RGB(0, 0, 3));
+    // set_color(RGB(0, 0, 3));
 }
 
 int main()

@@ -34,17 +34,16 @@ base_dir=`dirname $base_config_s`
 # echo base_dir $base_dir
 echo "$CONFIGURATION_FILE" | egrep "^$SHARED_DIR" &> /dev/null || exit 1
 
-numrobots="25"
 
 ###################################
 # experiment_length is in seconds #
 ###################################
-experiment_length="3600"
+experiment_length="5000"
 date_time=`date "+%Y-%m-%d"`
 RUNS=100
+numrobots="25"
 
-
-param_dir=$res_dir/"linear_3b_"$date_time"_"$experiment_length"_seconds"
+param_dir=$res_dir/"linear_3bits_"$date_time"_"$experiment_length"_seconds"
 
 
 if [[ ! -e $param_dir ]]; then
