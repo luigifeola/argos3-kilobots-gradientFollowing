@@ -426,6 +426,7 @@ void sampling_neighbors2()
     }
     broadcasting_robots[i].id = 0;
   }
+
   int threshold1 = 4;
   int threshold2 = 1;
   double alpha1 = 1.13;

@@ -17,7 +17,7 @@ for k in range(10):
         # if seed == 17:
         #     continue
         print("Dataframe " + str(seed))
-        data = pd.read_csv ("../results/social_behavior/irace_behavior1_10e5_budget_config_" + str(k+1) + "/seed#" + str(seed+1) + "_kiloLOG.tsv", sep = '\t')
+        data = pd.read_csv ("../results/social_behavior/irace_behavior2_10e5_budget_config_" + str(k+1) + "_test_turning/seed#" + str(seed+1) + "_kiloLOG.tsv", sep = '\t')
         columnsToDrop = []
         for i in range(25):
             columnsToDrop.append(4+i*4+i)
@@ -62,7 +62,7 @@ for k in range(10):
 
     boxplot_df['config_' + str(k)] = totalResults
 
-boxplot_df.to_csv('configs_first_behavior_10e5_budget.csv')
+boxplot_df.to_csv('configs_second_behavior_10e5_budget_with_new_turning.csv')
 boxplot = boxplot_df.boxplot(column = ['config_0', 'config_1', 'config_2', 'config_3', 'config_4', 'config_5', 'config_6', 'config_7', 'config_8', 'config_9'])
 boxplot.set_ylim(0,1)
 boxplot.plot()
