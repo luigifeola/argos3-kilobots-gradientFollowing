@@ -56,7 +56,8 @@ namespace
 /****************************************/
 /****************************************/
 
-GradientFollowingCALF::GradientFollowingCALF() : m_unDataAcquisitionFrequency(10)
+GradientFollowingCALF::GradientFollowingCALF() : m_unDataAcquisitionFrequency(10),
+                                                 generator(), distribution(0.0, 0.1)
 {
     c_rng = CRandom::CreateRNG("argos");
 }
@@ -329,6 +330,16 @@ void GradientFollowingCALF::UpdateKilobotState(CKilobotEntity &c_kilobot_entity)
 /****************************************/
 /****************************************/
 
+Real GradientFollowingCALF::addNoise(Real value)
+{
+        float noise = distribution(generator);
+        value += noise;
+        return (value > 0.0f) ? ( (value < 1.0f) ? value : 1.0f) : 0.0f;
+}
+
+/****************************************/
+/****************************************/
+
 void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity)
 {
     /* Create ARK-type messages variables */
@@ -347,21 +358,29 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
 
     Real fDistance = Distance(m_vecKilobotsPositions[unKilobotID], CVector2(0.0, 0.0));
     Real headindIndex = fDistance/(vArena_size/2.0);
-    Real symbol = static_cast<int>(((headindIndex * NUM_SYMBOLS) / MAX_VAL)); // Add 0.5 for rounding.
+
+    Real headindIndex1 = addNoise(headindIndex);
+    // Real headindIndex1 = headindIndex;
+
+    Real symbol = static_cast<int>(((headindIndex * NUM_SYMBOLS) / MAX_VAL)); // 0, 1, 2, 3
+
+    Real symbol1 = static_cast<int>(((headindIndex1 * NUM_SYMBOLS) / MAX_VAL)); // 0, 1, 2, 3
     // std::cout << unKilobotID << " symbol " << symbol << std::endl;
-    // std::cout << unKilobotID << " gradient val " << headindIndex << std::endl;
+    // std::cout << unKilobotID << " gradient " << headindIndex << " symbol " << symbol << std::endl;
+    // std::cout << unKilobotID << " noise gradient " << headindIndex1 << " symbol1 " << symbol1 << std::endl << std::endl;
+
     m_vecKilobotsLightSensors[unKilobotID] = headindIndex;
     overall_gradient += headindIndex;
 
-    if (symbol == 0.0)
+    if (symbol1 == 0.0)
     {
         tKilobotMessage.m_sType = kBLACK;
     }
-    else if (symbol == 1.0 && Real(discret_bits) > 2)
+    else if (symbol1 == 1.0 && Real(discret_bits) > 2)
     {
         tKilobotMessage.m_sType = kGRAY;
     }
-    else if (symbol == 2.0 && Real(discret_bits) > 3)
+    else if (symbol1 == 2.0 && Real(discret_bits) > 3)
     {
         tKilobotMessage.m_sType = kLIGHTGRAY;
     }

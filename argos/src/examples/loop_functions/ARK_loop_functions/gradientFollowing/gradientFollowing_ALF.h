@@ -61,7 +61,8 @@ typedef enum
 #include <argos3/plugins/robots/kilobot/control_interface/message.h>
 
 #include <array>
-
+#include <random>
+#include <algorithm>
 using namespace argos;
 
 class GradientFollowingCALF : public CALF
@@ -104,6 +105,9 @@ public:
     /** Get the message to send to a Kilobot according to its position */
     void UpdateKilobotState(CKilobotEntity &c_kilobot_entity);
 
+    /** Get the sensor reading to send to a Kilobot according to its position */
+    Real addNoise(Real value);
+
     /** Get the message to send to a Kilobot according to its position */
     void UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity);
 
@@ -118,6 +122,8 @@ public:
 
     /** Log Kilobot pose and state */
     void KiloLOG();
+
+    
 
 private:
     /************************************/
@@ -167,6 +173,9 @@ private:
 
     /** data acquisition frequency in ticks */
     UInt16 m_unDataAcquisitionFrequency;
+
+    std::default_random_engine generator;
+    std::normal_distribution<Real> distribution;
 
 };
 

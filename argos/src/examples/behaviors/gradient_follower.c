@@ -168,7 +168,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     case kBLACK:
         levy_exponent = 1.99;
         crw_exponent = 0.31;
-        // printf("Black\n");
+        // printf("%u Black\n", kilo_uid);
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kGRAY:
@@ -190,7 +190,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     case kWHITE:
         levy_exponent = 1.01;
         crw_exponent = 0.96;
-        // printf("White\n");
+        // printf("%d White\n", kilo_uid);
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
 
@@ -280,7 +280,6 @@ void random_walk()
         {
             /* start moving forward */
             last_motion_ticks = kilo_ticks;
-            // set_led();
             set_motion(FORWARD);
         }
         break;
@@ -301,6 +300,9 @@ void random_walk()
             {
                 angle = fabs(wrapped_cauchy_ppf(crw_exponent));
             }
+            set_led();
+            // printf("Taking decision!\n");
+            // printf("levy_exponent %f\n\n", levy_exponent);
             straight_ticks = (uint32_t)(fabs(levy(std_motion_steps, levy_exponent)));
             turning_ticks = (uint32_t)((angle / M_PI) * max_turning_ticks);
 
@@ -448,7 +450,8 @@ void loop()
         random_walk();
     }
     
-    set_color(RGB(0, 0, 3));
+    // This is only for heterogeneous robots
+    // set_color(RGB(0, 0, 3));
 }
 
 int main()
