@@ -397,19 +397,19 @@ void sampling_neighbors()
   {
     levy_exponent = alpha1;
     crw_exponent = rho1;
-    set_color(RGB(3, 0, 0));
+    // set_color(RGB(3, 0, 0));
   }
   else if(neighbors_count < threshold2)
   {
     levy_exponent = alpha2;
     crw_exponent = rho2;
-    set_color(RGB(0, 0, 3));
+    // set_color(RGB(0, 0, 3));
   }
   else
   {
     levy_exponent = alpha3;
     crw_exponent = rho3;
-    set_color(RGB(0, 3, 0));
+    // set_color(RGB(0, 3, 0));
   }
 
   neighbors_sampling_timer = kilo_ticks + neighbors_sampling_duration;
@@ -436,7 +436,7 @@ void sampling_neighbors2()
   {
     levy_exponent = alpha1;
     crw_exponent = rho1;
-    set_color(RGB(3, 0, 0));
+    // set_color(RGB(3, 0, 0));
     if(neighbors_count >= threshold1)
     {
       state = 1;
@@ -446,7 +446,7 @@ void sampling_neighbors2()
   {
     levy_exponent = alpha2;
     crw_exponent = rho2;
-    set_color(RGB(0, 0, 3));
+    // set_color(RGB(0, 0, 3));
     if(neighbors_count < threshold2)
     {
       state = 0;
@@ -485,6 +485,8 @@ void loop()
     {
         random_walk();
     }
+
+    set_color(RGB(3, 0, 0));
 }
 
 int main()

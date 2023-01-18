@@ -166,8 +166,8 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     switch (sa_type)
     {
     case kBLACK:
-        levy_exponent = 1.96;
-        crw_exponent = 0.29;
+        levy_exponent = 1.99;
+        crw_exponent = 0.31;
         // printf("Black\n");
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
@@ -180,15 +180,15 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kLIGHTGRAY:
-        levy_exponent = 1.95;
-        crw_exponent = 0.00;
-        printf("LightGray\n");
+        levy_exponent = 1.02;
+        crw_exponent = 0.05;
+        // printf("LightGray\n");
         // printf("Error to many bits!!!!!\n");
         // printf("Error to many bits!!!!!\n");
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kWHITE:
-        levy_exponent = 1.0;
+        levy_exponent = 1.01;
         crw_exponent = 0.96;
         // printf("White\n");
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
@@ -280,7 +280,7 @@ void random_walk()
         {
             /* start moving forward */
             last_motion_ticks = kilo_ticks;
-            set_led();
+            // set_led();
             set_motion(FORWARD);
         }
         break;
@@ -447,7 +447,8 @@ void loop()
     {
         random_walk();
     }
-    // set_color(RGB(0, 0, 3));
+    
+    set_color(RGB(0, 0, 3));
 }
 
 int main()

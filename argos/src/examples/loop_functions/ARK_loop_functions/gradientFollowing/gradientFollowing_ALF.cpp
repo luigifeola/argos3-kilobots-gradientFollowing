@@ -46,7 +46,7 @@ namespace
     } Discretization;
 
     Background background_flag = DISCRETE;
-    Discretization discret_bits = BITS_3;
+    Discretization discret_bits = BITS_4;
 
     const Real MAX_VAL = 1.0;
     const Real NUM_SYMBOLS = Real(discret_bits);
@@ -173,7 +173,7 @@ void GradientFollowingCALF::SetupVirtualEnvironments(TConfigurationNode &t_tree)
     GetNodeAttributeOrDefault(tExperimentVariablesNode, "cornerProportion", cornerProportion, 0.1);
     GetNodeAttributeOrDefault(tExperimentVariablesNode, "socialRobots", socialRobots, socialRobots);
     // std::cout << std::endl << "cornerProportion: " << cornerProportion << std::endl << std::endl;
-    // std::cout << std::endl << "socialRobots: " << socialRobots << std::endl << std::endl;
+    std::cout << std::endl << "socialRobots: " << socialRobots << std::endl << std::endl;
 
     /**
      * 

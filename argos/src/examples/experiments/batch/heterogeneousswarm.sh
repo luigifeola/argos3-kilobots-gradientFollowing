@@ -9,11 +9,6 @@ if [ "$#" -ne 2 ]; then
     exit 11
 fi
 
-cd build
-cmake ../src
-make
-cd ..
-
 wdir=`pwd`
 base_config=.$1/$2
 echo "base_config:" $base_config
@@ -25,7 +20,7 @@ if [ ! -e $base_config ]; then
     fi
 fi
 
-res_dir=$wdir/"results/heterogeneous"
+res_dir=$wdir/"results/heterogeneous/4-bits"
 if [[ ! -e $res_dir ]]; then
     cmake -E make_directory $res_dir
 # else
@@ -33,49 +28,45 @@ if [[ ! -e $res_dir ]]; then
 #     exit 1
 fi
 
-
-
-base_dir=`dirname $base_config_s`
-# echo base_dir $base_dir
 echo "$CONFIGURATION_FILE" | egrep "^$SHARED_DIR" &> /dev/null || exit 1
 
-numrobots="15"
-numrobots2="10"
+socialrobots="0 5 10 15 20 25"
 
 ###################################
 # experiment_length is in seconds #
 ###################################
-experiment_length="3600"
-date_time=`date "+%Y-%m-%d-%H:%M"`
-RUNS=10
-
-
-param_dir=$res_dir/"heterogeneous_"$date_time"_"$experiment_length"_seconds"
-# param_dir=$res_dir/"irace_behavior2_config_10"
-
-if [[ ! -e $param_dir ]]; then
-    cmake -E make_directory $param_dir
-fi
-
-for it in $(seq 1 $RUNS); do
-
-    config=`printf 'config_seed%03d.argos' $it`
-    cp $base_config $config
-    sed -i "s|__TIMEEXPERIMENT__|$experiment_length|g" $config
-    sed -i "s|__SEED__|$it|g" $config
-    sed -i "s|__NUMROBOTS__|$numrobots|g" $config
-    sed -i "s|__NUMROBOTS2__|$numrobots2|g" $config
-
-    robot_positions_file="seed#${it}_kiloLOG.tsv"
-    echo $robot_positions_file
-    sed -i "s|__ROBPOSOUTPUT__|$robot_positions_file|g" $config
+experiment_length="5000"
+date_time=`date "+%Y-%m-%d"`
+RUNS=100
 
 
 
-    echo "Running next configuration seed $it with $numrobots robots"
-    echo "argos3 -c $1$config"
-    argos3 -c './'$config
+for nrob in $socialrobots; do
+    
+    param_dir=$res_dir/"heterogeneous#"$date_time"_socialRobots#"$nrob"_seconds#"$experiment_length
+    if [[ ! -e $param_dir ]]; then
+        cmake -E make_directory $param_dir
+    fi
 
-    mv *.tsv $param_dir
-    rm *.argos
+    for it in $(seq 1 $RUNS); do
+        config=`printf 'config_seed%03d.argos' $it`
+        cp $base_config $config
+        sed -i "s|__TIMEEXPERIMENT__|$experiment_length|g" $config
+        sed -i "s|__SEED__|$it|g" $config
+        sed -i "s|__SOCIALROBOTS__|$nrob|g" $config
+
+        robot_positions_file="seed#${it}_kiloLOG.tsv"
+        echo $robot_positions_file
+        sed -i "s|__ROBPOSOUTPUT__|$robot_positions_file|g" $config
+
+
+
+        echo "Running next configuration seed $it with $nrob  social robots"
+        echo "argos3 -c $1$config"
+        argos3 -c './'$config
+
+
+        mv *.tsv $param_dir
+        rm *.argos
+    done
 done
