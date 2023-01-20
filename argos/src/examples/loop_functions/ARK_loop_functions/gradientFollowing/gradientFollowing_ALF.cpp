@@ -46,11 +46,12 @@ namespace
     } Discretization;
 
     Background background_flag = DISCRETE;
-    Discretization discret_bits = BITS_4;
+    Discretization discret_bits = BITS_2;
 
     const Real MAX_VAL = 1.0;
     const Real NUM_SYMBOLS = Real(discret_bits);
     Real overall_gradient = 0.0;
+    Real gradient_radius = 0.5;
 }
 
 /****************************************/
@@ -357,14 +358,14 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
     // std::cout<< "Tograyscale " << m_vecKilobotsLightSensors[unKilobotID].ToGrayScale() << std::endl;
 
     Real fDistance = Distance(m_vecKilobotsPositions[unKilobotID], CVector2(0.0, 0.0));
-    Real headindIndex = fDistance/(vArena_size/2.0);
+    Real headindIndex = fDistance/(gradient_radius);
 
-    Real headindIndex1 = addNoise(headindIndex);
+    // Real headindIndex1 = addNoise(headindIndex);
     // Real headindIndex1 = headindIndex;
+    // Real symbol1 = static_cast<int>(((headindIndex1 * NUM_SYMBOLS) / MAX_VAL)); // 0, 1, 2, 3
 
     Real symbol = static_cast<int>(((headindIndex * NUM_SYMBOLS) / MAX_VAL)); // 0, 1, 2, 3
 
-    Real symbol1 = static_cast<int>(((headindIndex1 * NUM_SYMBOLS) / MAX_VAL)); // 0, 1, 2, 3
     // std::cout << unKilobotID << " symbol " << symbol << std::endl;
     // std::cout << unKilobotID << " gradient " << headindIndex << " symbol " << symbol << std::endl;
     // std::cout << unKilobotID << " noise gradient " << headindIndex1 << " symbol1 " << symbol1 << std::endl << std::endl;
@@ -372,15 +373,15 @@ void GradientFollowingCALF::UpdateVirtualSensor(CKilobotEntity &c_kilobot_entity
     m_vecKilobotsLightSensors[unKilobotID] = headindIndex;
     overall_gradient += headindIndex;
 
-    if (symbol1 == 0.0)
+    if (symbol == 0.0)
     {
         tKilobotMessage.m_sType = kBLACK;
     }
-    else if (symbol1 == 1.0 && Real(discret_bits) > 2)
+    else if (symbol == 1.0 && Real(discret_bits) > 2)
     {
         tKilobotMessage.m_sType = kGRAY;
     }
-    else if (symbol1 == 2.0 && Real(discret_bits) > 3)
+    else if (symbol == 2.0 && Real(discret_bits) > 3)
     {
         tKilobotMessage.m_sType = kLIGHTGRAY;
     }
@@ -536,7 +537,7 @@ CColor GradientFollowingCALF::GetFloorColor(const CVector2 &vec_position_on_plan
     CColor cColor = CColor::WHITE;
 
     CVector2 gradient_pos = CVector2(0.0, 0.0);
-    Real max_distance = vArena_size / 2.0;
+    Real max_distance = gradient_radius;
 
     Real fDistance = Distance(vec_position_on_plane, gradient_pos);
 

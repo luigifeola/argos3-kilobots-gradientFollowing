@@ -150,38 +150,47 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     // printf("sa_type: %d\n", sa_type);
     // printf("sa_payload: %d\n", sa_payload);
     /*
-    2 Bits
+    2 Bits — 2_3678665
         std alpha0 rho0 alpha1 rho1
          1   1.99 0.00   1.01 0.98
+    2 Bits — guess
+        std alpha0 rho0 alpha1 rho1
+         1   2.00  0.00   1.00 0.99
 
-    3 Bits
+    3 Bits — 3_2679431
         std alpha0 rho0 alpha1 rho1 alpha2 rho2
          1   1.96 0.29   1.95 0.02      1 0.96
+    3 Bits — guess
+        std alpha0 rho0 alpha1 rho1 alpha2 rho2
+         1   2.00  0.00   1.50  0.5  1.00  0.99
 
-    4 Bits
+    4 Bits — 4_2680644
          std alpha0 rho0 alpha1 rho1 alpha2 rho2 alpha3 rho3
            1   1.99 0.31   1.95 0.00   1.02 0.05   1.01 0.96
+    4 Bits — guess
+        std alpha0 rho0 alpha1 rho1 alpha2 rho2 alpha3 rho3
+         1   2.00  0.00  1.66  0.66  1.33  0.33  1.00  0.99
     
     */
     switch (sa_type)
     {
     case kBLACK:
         levy_exponent = 1.99;
-        crw_exponent = 0.31;
+        crw_exponent = 0.0;
         // printf("%u Black\n", kilo_uid);
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kGRAY:
         levy_exponent = 1.95;
-        crw_exponent = 0.00;
+        crw_exponent = 0.02;
         // printf("Gray\n");
         // printf("Error to many bits!!!!!\n");
         // printf("Error to many bits!!!!!\n");
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kLIGHTGRAY:
-        levy_exponent = 1.02;
-        crw_exponent = 0.05;
+        levy_exponent = 1.95;
+        crw_exponent = 0.02;
         // printf("LightGray\n");
         // printf("Error to many bits!!!!!\n");
         // printf("Error to many bits!!!!!\n");
@@ -189,7 +198,7 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
         break;
     case kWHITE:
         levy_exponent = 1.01;
-        crw_exponent = 0.96;
+        crw_exponent = 0.98;
         // printf("%d White\n", kilo_uid);
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
@@ -300,6 +309,7 @@ void random_walk()
             {
                 angle = fabs(wrapped_cauchy_ppf(crw_exponent));
             }
+            // uncomment when single behaviour, comment when heterogeneous
             set_led();
             // printf("Taking decision!\n");
             // printf("levy_exponent %f\n\n", levy_exponent);

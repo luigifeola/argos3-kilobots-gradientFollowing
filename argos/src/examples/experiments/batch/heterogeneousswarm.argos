@@ -75,12 +75,12 @@
     <!-- *********************** -->
     <!-- * Arena configuration * -->
     <!-- *********************** -->
-    <arena size="1, 1, 4" center="0,0,0.5">
+    <arena size="__ARENASIZE__, __ARENASIZE__, 4" center="0,0,0.5">
 
         <distribute>
-            <position method="uniform" min="-0.48,-0.48,0.0" max="0.48,0.48,0.0" />
+            <position method="uniform" min="-__POSDISTR__,-__POSDISTR__,0.0" max="__POSDISTR__,__POSDISTR__,0.0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
-            <entity quantity="25" max_trials="100">
+            <entity quantity="__NUMROBOTS__" max_trials="100">
                 <kilobot id="kb">
                     <controller config="gradient_follower"/> <dynamics2d friction="0.7" />
                 </kilobot>
