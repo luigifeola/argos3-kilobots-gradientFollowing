@@ -20,7 +20,7 @@ if [ ! -e $base_config ]; then
     fi
 fi
 
-res_dir=$wdir/"results/scalability/2-bits"
+res_dir=$wdir/"results/scalability/3-bits"
 if [[ ! -e $res_dir ]]; then
     cmake -E make_directory $res_dir
 # else
@@ -64,7 +64,7 @@ for nrob in $numrobots; do
             echo "The arena size is: $a_size"
             echo "The social robots are: $social_size"
 
-            param_dir=$res_dir/"heterogeneous#"$date_time"_arenasize#"$(echo "$a_size * 100" | bc -l)"_numrobots#"$nrob"_socialRobots#"$nsocial"_seconds#"$experiment_length
+            param_dir=$res_dir/"heterogeneous#"$date_time"_arenasize#"$(echo "$a_size * 100" | bc -l)"_numrobots#"$nrob"_socialRobots#"$social_size"_seconds#"$experiment_length
             if [[ ! -e $param_dir ]]; then
                 cmake -E make_directory $param_dir
             fi
@@ -74,7 +74,7 @@ for nrob in $numrobots; do
                 cp $base_config $config
                 sed -i "s|__TIMEEXPERIMENT__|$experiment_length|g" $config
                 sed -i "s|__SEED__|$it|g" $config
-                sed -i "s|__SOCIALROBOTS__|$nsocial|g" $config
+                sed -i "s|__SOCIALROBOTS__|$social_size|g" $config
                 sed -i "s|__NUMROBOTS__|$nrob|g" $config
                 sed -i "s|__ARENASIZE__|$a_size|g" $config
                 sed -i "s|__POSDISTR__|$posdistr|g" $config
@@ -85,7 +85,7 @@ for nrob in $numrobots; do
 
 
 
-                echo "Running next configuration seed $it with $nsocial  social robots"
+                echo "Running next configuration seed $it with $social_size  social robots"
                 echo "argos3 -c $1$config"
                 argos3 -c './'$config
 

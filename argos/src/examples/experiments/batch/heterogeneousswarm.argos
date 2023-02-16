@@ -115,7 +115,7 @@
     <!-- <visualization>
         <qt-opengl>
             <camera>
-                <placement idx="0" position="0.0,-0.00001,0.75" look_at="0,0,0" lens_focal_length="20"/>
+                <placement idx="0" position="0.0,-0.00001,__ARENASIZE__" look_at="0,0,0" lens_focal_length="20"/>
                 <placement idx="1" position="0.0,-0.8,0.3" look_at="0,0,0" lens_focal_length="25"/>
                 <placement idx="2" position="-0.0229259,-0.55,0.0725521" look_at="0.0273839,0.812385,-0.0624333" lens_focal_length="20" />
                 <placement idx="3" position="-0.55,-0.55,0.2" look_at="0.45,0.45,0" lens_focal_length="30"/>

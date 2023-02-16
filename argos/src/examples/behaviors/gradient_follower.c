@@ -175,30 +175,30 @@ void parse_smart_arena_message(uint8_t data[9], uint8_t kb_index)
     switch (sa_type)
     {
     case kBLACK:
-        levy_exponent = 1.99;
-        crw_exponent = 0.0;
+        levy_exponent = 1.96;
+        crw_exponent = 0.29;
         // printf("%u Black\n", kilo_uid);
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kGRAY:
-        levy_exponent = 1.95;
-        crw_exponent = 0.02;
+        levy_exponent = 1.0;
+        crw_exponent = 0.0;
         // printf("Gray\n");
         // printf("Error to many bits!!!!!\n");
         // printf("Error to many bits!!!!!\n");
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kLIGHTGRAY:
-        levy_exponent = 1.95;
-        crw_exponent = 0.02;
+        levy_exponent = 1.0;
+        crw_exponent = 0.0;
         // printf("LightGray\n");
         // printf("Error to many bits!!!!!\n");
         // printf("Error to many bits!!!!!\n");
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;
     case kWHITE:
-        levy_exponent = 1.01;
-        crw_exponent = 0.98;
+        levy_exponent = 1.0;
+        crw_exponent = 0.96;
         // printf("%d White\n", kilo_uid);
         // printf("alpha: %f   rho: %f\n", levy_exponent, crw_exponent);
         break;

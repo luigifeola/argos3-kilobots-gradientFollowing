@@ -486,7 +486,7 @@ void loop()
         random_walk();
     }
 
-    set_color(RGB(3, 0, 0));
+    set_color(RGB(3, 3, 0));
 }
 
 int main()

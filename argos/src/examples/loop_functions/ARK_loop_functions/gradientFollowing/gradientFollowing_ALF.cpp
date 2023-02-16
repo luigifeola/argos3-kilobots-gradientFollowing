@@ -46,7 +46,7 @@ namespace
     } Discretization;
 
     Background background_flag = DISCRETE;
-    Discretization discret_bits = BITS_2;
+    Discretization discret_bits = BITS_3;
 
     const Real MAX_VAL = 1.0;
     const Real NUM_SYMBOLS = Real(discret_bits);
